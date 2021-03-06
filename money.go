@@ -1,0 +1,210 @@
+package mongo
+
+import (
+	"fmt"
+	"math"
+	"strconv"
+	"strings"
+)
+
+// Money is the main structure that holds the monetary value.
+type Money struct {
+	format currencyFormat // The currency format object.
+	value  int64          // The monetary value as a integer.
+	round  roundFunc      // The rounding function to use for division and multiplication.
+}
+
+// String returns the string representation of the monetary value.
+func (m Money) String() string {
+	str := strconv.FormatInt(m.value, 10)
+
+	if len(str) <= m.format.subunits {
+		str = strings.Repeat("0", m.format.subunits-len(str)+1) + str
+	}
+
+	if m.format.thouSep != "" {
+		for i := len(str) - m.format.subunits - 3; i > 0; i -= 3 {
+			str = str[:i] + m.format.thouSep + str[i:]
+		}
+	}
+
+	if m.format.subunits > 0 {
+		str = str[:len(str)-m.format.subunits] + m.format.subSep + str[len(str)-m.format.subunits:]
+	}
+
+	str = strings.Replace(m.format.format, "0", str, 1)
+
+	return str
+}
+
+// GBP is a helper function.
+func GBP(value int64) (Money, error) {
+	return FromSubunits("GBP", value, roundHalfUp)
+}
+
+// EUR is a helper function.
+func EUR(value int64) (Money, error) {
+	return FromSubunits("EUR", value, roundHalfUp)
+}
+
+// FromSubunits constructs a new money object from an integer. The integer used
+// will contain the subunits of the currency.
+func FromSubunits(currencyCode string, value int64, f roundFunc) (Money, error) {
+	curr, ok := currencyFormats[currencyCode]
+	if !ok {
+		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currencyCode)
+	}
+	m := Money{
+		format: curr,
+		value:  value,
+		round:  f,
+	}
+	return m, nil
+}
+
+// AssertSameCurrency will panic if the arguments are money objects containing
+// different currencies.
+func assertSameCurrency(a, b Money) {
+	if a.format.code != b.format.code {
+		panic("Failed to perform operation on different currencies")
+	}
+}
+
+// Add is an arithmetic operator.
+func (m Money) Add(v Money) Money {
+	assertSameCurrency(m, v)
+	m.value += v.value
+	return m
+}
+
+// Sub is an arithmetic operator.
+func (m Money) Sub(v Money) Money {
+	assertSameCurrency(m, v)
+	m.value -= v.value
+	return m
+}
+
+// Mul is an arithmetic operator. This operation will perform rounding of the
+// resulting value.
+func (m Money) Mul(f float64) Money {
+	m.value = m.round(float64(m.value) * f)
+	return m
+}
+
+// Div is an arithmetic operator. This operation will perform rounding of the
+// resulting value. If you need to accurately divide a money object with
+// lossless precision, use the Split or Allocate function instead.
+func (m Money) Div(f float64) Money {
+	m.value = m.round(float64(m.value) / f)
+	return m
+}
+
+// Abs returns a money object with an absolute value.
+func (m Money) Abs() Money {
+	if m.value < 0 {
+		m.value = -m.value
+	}
+	return m
+}
+
+// Eq is a logical operator.
+func (m Money) Eq(v Money) bool {
+	assertSameCurrency(m, v)
+	return m.value == v.value
+}
+
+// Gt is a logical operator.
+func (m Money) Gt(v Money) bool {
+	assertSameCurrency(m, v)
+	return m.value > v.value
+}
+
+// Gte is a logical operator.
+func (m Money) Gte(v Money) bool {
+	assertSameCurrency(m, v)
+	return m.value >= v.value
+}
+
+// Lt is a logical operator.
+func (m Money) Lt(v Money) bool {
+	assertSameCurrency(m, v)
+	return m.value < v.value
+}
+
+// Lte is a logical operator.
+func (m Money) Lte(v Money) bool {
+	assertSameCurrency(m, v)
+	return m.value <= v.value
+}
+
+// IsZero returns a boolean value.
+func (m Money) IsZero() bool {
+	return m.value == 0
+}
+
+// IsPos returns a boolean value.
+func (m Money) IsPos() bool {
+	return m.value >= 0
+}
+
+// IsNeg returns a boolean value.
+func (m Money) IsNeg() bool {
+	return m.value < 0
+}
+
+// Split returns a slice containing money objects split as evenly as possible by
+// 'n' times. This operation is lossless and will account for all remainders.
+func (m Money) Split(n int64) []Money {
+	if n <= 0 {
+		panic("Failed to split money by zero")
+	}
+	s := make([]Money, 0, n)
+	rem := int64(math.Mod(float64(m.value), float64(n)))
+	value := int64(m.value / n)
+	var i int64
+	for i = 0; i < n; i++ {
+		if rem > 0 {
+			piece, _ := FromSubunits(m.format.code, value+1, m.round)
+			rem--
+			s = append(s, piece)
+		} else {
+			piece, _ := FromSubunits(m.format.code, value, m.round)
+			s = append(s, piece)
+		}
+	}
+	return s
+}
+
+// Allocate returns a slice containing money objects split according to the
+// passed ratios. The ratios are completely arbitrary and are calculated as
+// percentages of the overall sum. This operation is lossless and will account
+// for all remainders.
+func (m Money) Allocate(ratios ...int64) []Money {
+	var sum int64 = 0
+	for _, n := range ratios {
+		sum += n
+	}
+	if sum <= 0 {
+		panic("Failed to allocate money, no ratios passed")
+	}
+	s := make([]Money, 0, len(ratios))
+	var allocated int64 = 0
+	for _, n := range ratios {
+		value := m.value * n / sum
+		piece, _ := FromSubunits(m.format.code, value, m.round)
+		s = append(s, piece)
+		allocated += value
+	}
+	rem := m.value - allocated
+	for i := 0; i < len(ratios) && rem > 0; i++ {
+		s[i].value++
+		rem--
+	}
+	return s
+}
+
+// MarshalJSON is an implementation of json.Marshaller.
+func (m Money) MarshalJSON() ([]byte, error) {
+	json := fmt.Sprintf(`{"currency": "%s", "formatted":"%s"}`, m.format.code, m.String())
+	return []byte(json), nil
+}

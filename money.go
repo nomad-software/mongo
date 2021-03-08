@@ -49,7 +49,7 @@ func EUR(value int64) (Money, error) {
 }
 
 // FromSubunits constructs a new money object from an integer. The integer used
-// will contain the subunits of the currency.
+// should contain the subunits of the currency.
 func FromSubunits(currencyCode string, value int64, f roundFunc) (Money, error) {
 	curr, ok := currencyFormats[currencyCode]
 	if !ok {
@@ -63,9 +63,9 @@ func FromSubunits(currencyCode string, value int64, f roundFunc) (Money, error) 
 	return m, nil
 }
 
-// FromString constructs a new money object from a string. The string should not
-// contain a currency symbol.
-func FromString(currencyCode string, value string, f roundFunc) (Money, error) {
+// FromString constructs a new money object from a string. Everything not
+// contained within a number is stripped out before parsing.
+func FromString(currencyCode string, str string, f roundFunc) (Money, error) {
 	curr, ok := currencyFormats[currencyCode]
 	if !ok {
 		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currencyCode)
@@ -73,28 +73,28 @@ func FromString(currencyCode string, value string, f roundFunc) (Money, error) {
 
 	// Remove everything before the first number and after the last number.
 	re := regexp.MustCompile("^.*?([0-9].*[0-9]).*$")
-	value = re.ReplaceAllString(value, "$1")
+	str = re.ReplaceAllString(str, "$1")
 
 	if curr.subunits > 0 {
 		// If the string is longer than the amount of subunits in this
 		// currency, we expect to see a subunit separator.
-		if len(value) > curr.subunits {
-			if string(value[len(value)-(curr.subunits+1)]) != curr.subSep {
+		if len(str) > curr.subunits {
+			if string(str[len(str)-(curr.subunits+1)]) != curr.subSep {
 				return Money{}, fmt.Errorf("Failed to parse string to money, no subunits defined")
 			}
-			value = strings.ReplaceAll(value, curr.subSep, "")
+			str = strings.ReplaceAll(str, curr.subSep, "")
 		}
-		value = strings.ReplaceAll(value, curr.thouSep, "")
+		str = strings.ReplaceAll(str, curr.thouSep, "")
 	}
 
-	v, err := strconv.ParseInt(value, 10, 64)
+	value, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {
 		return Money{}, err
 	}
 
 	m := Money{
 		format: curr,
-		value:  v,
+		value:  value,
 		round:  f,
 	}
 
@@ -124,15 +124,15 @@ func (m Money) Sub(v Money) Money {
 }
 
 // Mul is an arithmetic operator. This operation will perform rounding of the
-// resulting value.
+// resulting value if necessary.
 func (m Money) Mul(f float64) Money {
 	m.value = m.round(float64(m.value) * f)
 	return m
 }
 
 // Div is an arithmetic operator. This operation will perform rounding of the
-// resulting value. If you need to accurately divide a money object with
-// lossless precision, use the Split or Allocate function instead.
+// resulting value if necessary. If you need to accurately divide a money object
+// with lossless precision, use the Split or Allocate function instead.
 func (m Money) Div(f float64) Money {
 	m.value = m.round(float64(m.value) / f)
 	return m
@@ -176,17 +176,17 @@ func (m Money) Lte(v Money) bool {
 	return m.value <= v.value
 }
 
-// IsZero returns a boolean value.
+// IsZero returns a boolean value if the value is zero.
 func (m Money) IsZero() bool {
 	return m.value == 0
 }
 
-// IsPos returns a boolean value.
+// IsPos returns a boolean value if the value is positive.
 func (m Money) IsPos() bool {
 	return m.value >= 0
 }
 
-// IsNeg returns a boolean value.
+// IsNeg returns a boolean value if the value is negative.
 func (m Money) IsNeg() bool {
 	return m.value < 0
 }

@@ -3,6 +3,7 @@ package mongo
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -59,6 +60,44 @@ func FromSubunits(currencyCode string, value int64, f roundFunc) (Money, error) 
 		value:  value,
 		round:  f,
 	}
+	return m, nil
+}
+
+// FromString constructs a new money object from a string. The string should not
+// contain a currency symbol.
+func FromString(currencyCode string, value string, f roundFunc) (Money, error) {
+	curr, ok := currencyFormats[currencyCode]
+	if !ok {
+		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currencyCode)
+	}
+
+	// Remove everything before the first number and after the last number.
+	re := regexp.MustCompile("^.*?([0-9].*[0-9]).*$")
+	value = re.ReplaceAllString(value, "$1")
+
+	if curr.subunits > 0 {
+		// If the string is longer than the amount of subunits in this
+		// currency, we expect to see a subunit separator.
+		if len(value) > curr.subunits {
+			if string(value[len(value)-(curr.subunits+1)]) != curr.subSep {
+				return Money{}, fmt.Errorf("Failed to parse string to money, no subunits defined")
+			}
+			value = strings.ReplaceAll(value, curr.subSep, "")
+		}
+		value = strings.ReplaceAll(value, curr.thouSep, "")
+	}
+
+	v, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		return Money{}, err
+	}
+
+	m := Money{
+		format: curr,
+		value:  v,
+		round:  f,
+	}
+
 	return m, nil
 }
 

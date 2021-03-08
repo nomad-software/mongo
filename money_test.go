@@ -32,17 +32,67 @@ func TestScenario(t *testing.T) {
 }
 
 func TestFromSubunits(t *testing.T) {
-	m, err := FromSubunits("GBP", 0, roundHalfUp)
-	if err != nil {
-		t.Errorf("FromSubunits failed to recognise code 'GBP'")
-	}
-
-	m, err = FromSubunits("XXX", 0, roundHalfUp)
+	m, err := FromSubunits("XXX", 1457, roundHalfUp)
 	if err == nil {
 		t.Errorf("FromSubunits failed to error on code 'XXX'")
 	}
 
-	assertMoneyValue(t, m, 0)
+	m, err = FromSubunits("GBP", 1457, roundHalfUp)
+	if err != nil {
+		t.Errorf("FromSubunits failed to recognise code 'GBP'")
+	}
+
+	assertMoneyValue(t, m, 1457)
+}
+
+func TestFromString(t *testing.T) {
+	m, err := FromString("XXX", "14.57", roundHalfUp)
+	if err == nil {
+		t.Errorf("FromSubunits failed to error on code 'XXX'")
+	}
+
+	m, err = FromString("GBP", "14.57", roundHalfUp)
+	if err != nil {
+		t.Errorf("FromSubunits failed to recognise code 'GBP'")
+	}
+
+	assertMoneyValue(t, m, 1457)
+}
+
+func TestFromStringFormats(t *testing.T) {
+	m, _ := FromString("JPY", "¥145139", roundHalfUp)
+	assertMoneyValue(t, m, 145139)
+
+	m, _ = FromString("EUR", "€14.57", roundHalfUp)
+	assertMoneyValue(t, m, 1457)
+
+	m, _ = FromString("JOD", "2,462.486 د.أ", roundHalfUp)
+	assertMoneyValue(t, m, 2462486)
+
+	m, _ = FromString("CLF", "UF157.896,4418", roundHalfUp)
+	assertMoneyValue(t, m, 1578964418)
+}
+
+func TestFromStringErrors(t *testing.T) {
+	_, err := FromString("JPY", "145139.0", roundHalfUp)
+	if err == nil {
+		t.Errorf("FromString failed to error on subunits on a currency that doesn't support them")
+	}
+
+	_, err = FromString("EUR", "14.570", roundHalfUp)
+	if err == nil {
+		t.Errorf("FromString failed to error on too many subunits defined")
+	}
+
+	_, err = FromString("JOD", "2,462.48", roundHalfUp)
+	if err == nil {
+		t.Errorf("FromString failed to error on too few subunits defined")
+	}
+
+	_, err = FromString("CLF", "1578964418", roundHalfUp)
+	if err == nil {
+		t.Errorf("FromString failed to error on no subunits defined")
+	}
 }
 
 func TestImmutability(t *testing.T) {

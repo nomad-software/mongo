@@ -15,7 +15,8 @@ type Money struct {
 	round  roundFunc      // The rounding function to use for division and multiplication.
 }
 
-// String returns the string representation of the monetary value.
+// String is an implementation of fmt.Stringer and returns the string
+// formatted representation of the monetary value.
 func (m Money) String() string {
 	str := strconv.FormatInt(m.value, 10)
 

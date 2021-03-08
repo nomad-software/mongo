@@ -9,6 +9,10 @@
 Mongo is a straightforward money library for Go that can make it easy to
 handle bug prone arithmetic when dealing with money.
 
+## Documentation
+
+https://pkg.go.dev/github.com/nomad-software/mongo#section-documentation
+
 ## Example 1
 
 ```go

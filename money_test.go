@@ -37,7 +37,7 @@ func TestFromSubunits(t *testing.T) {
 		t.Errorf("FromSubunits failed to error on code 'XXX'")
 	}
 
-	m, err = FromSubunits("GBP", 1457, roundHalfUp)
+	m, err = FromSubunits("GBP", 1457, roundHalfToEven)
 	if err != nil {
 		t.Errorf("FromSubunits failed to recognise code 'GBP'")
 	}
@@ -60,7 +60,19 @@ func TestFromString(t *testing.T) {
 }
 
 func TestFromStringFormats(t *testing.T) {
-	m, _ := FromString("JPY", "¥145139", roundHalfUp)
+	m, _ := FromString("GBP", "-£1,451.39", roundHalfUp)
+	assertMoneyValue(t, m, -145139)
+
+	m, _ = FromString("EUR", "-127.54 €", roundHalfUp)
+	assertMoneyValue(t, m, -12754)
+
+	m, _ = FromString("DKK", "kr-127,54", roundHalfUp)
+	assertMoneyValue(t, m, -12754)
+
+	m, _ = FromString("EUR", "€ 127.54-", roundHalfUp)
+	assertMoneyValue(t, m, -12754)
+
+	m, _ = FromString("JPY", "¥145139", roundHalfUp)
 	assertMoneyValue(t, m, 145139)
 
 	m, _ = FromString("EUR", "€14.57", roundHalfUp)
@@ -100,7 +112,7 @@ func TestImmutability(t *testing.T) {
 	y, _ := GBP(50)
 	z := x.Add(y)
 	z = x.Sub(y)
-	z = x.Mul(20.5)
+	z = x.Mul(20)
 	z = x.Div(7)
 	s := x.Split(3)
 
@@ -111,7 +123,7 @@ func TestImmutability(t *testing.T) {
 	assertMoneyValue(t, x, 69)
 }
 
-func TestPanicOnAdd(t *testing.T) {
+func TestCurrencyPanicOnAdd(t *testing.T) {
 	x, _ := GBP(69)
 	y, _ := EUR(50)
 
@@ -119,7 +131,7 @@ func TestPanicOnAdd(t *testing.T) {
 	x.Add(y)
 }
 
-func TestPanicOnSub(t *testing.T) {
+func TestCurrencyPanicOnSub(t *testing.T) {
 	x, _ := GBP(69)
 	y, _ := EUR(50)
 
@@ -127,7 +139,7 @@ func TestPanicOnSub(t *testing.T) {
 	x.Sub(y)
 }
 
-func TestPanicOnEq(t *testing.T) {
+func TestCurrencyPanicOnEq(t *testing.T) {
 	x, _ := GBP(69)
 	y, _ := EUR(50)
 
@@ -135,7 +147,7 @@ func TestPanicOnEq(t *testing.T) {
 	x.Eq(y)
 }
 
-func TestPanicOnGt(t *testing.T) {
+func TestCurrencyPanicOnGt(t *testing.T) {
 	x, _ := GBP(69)
 	y, _ := EUR(50)
 
@@ -143,7 +155,7 @@ func TestPanicOnGt(t *testing.T) {
 	x.Gt(y)
 }
 
-func TestPanicOnGte(t *testing.T) {
+func TestCurrencyPanicOnGte(t *testing.T) {
 	x, _ := GBP(69)
 	y, _ := EUR(50)
 
@@ -151,7 +163,7 @@ func TestPanicOnGte(t *testing.T) {
 	x.Gte(y)
 }
 
-func TestPanicOnLt(t *testing.T) {
+func TestCurrencyPanicOnLt(t *testing.T) {
 	x, _ := GBP(69)
 	y, _ := EUR(50)
 
@@ -159,7 +171,7 @@ func TestPanicOnLt(t *testing.T) {
 	x.Lt(y)
 }
 
-func TestPanicOnLte(t *testing.T) {
+func TestCurrencyPanicOnLte(t *testing.T) {
 	x, _ := GBP(69)
 	y, _ := EUR(50)
 
@@ -189,14 +201,14 @@ func TestSub(t *testing.T) {
 
 func TestMul(t *testing.T) {
 	x, _ := GBP(1337)
-	assertMoneyValue(t, x.Mul(1.2457), 1666)
-	assertMoneyValue(t, x.Mul(0.872), 1166)
-	assertMoneyValue(t, x.Mul(541.544), 724044)
+	assertMoneyValue(t, x.Mul(0), 0)
+	assertMoneyValue(t, x.Mul(1), 1337)
+	assertMoneyValue(t, x.Mul(3), 4011)
 
 	x, _ = GBP(-114)
-	assertMoneyValue(t, x.Mul(1.2457), -142)
-	assertMoneyValue(t, x.Mul(0.872), -99)
-	assertMoneyValue(t, x.Mul(541.543), -61736)
+	assertMoneyValue(t, x.Mul(0), 0)
+	assertMoneyValue(t, x.Mul(1), -114)
+	assertMoneyValue(t, x.Mul(3), -342)
 
 	x, _ = GBP(100)
 	assertMoneyValue(t, x.Mul(5), 500)
@@ -208,9 +220,19 @@ func TestDiv(t *testing.T) {
 	assertMoneyValue(t, x.Div(0.871), 1535)
 	assertMoneyValue(t, x.Div(541.544), 2)
 
+	x, _ = FromSubunits("GBP", 1337, roundUp)
+	assertMoneyValue(t, x.Div(1.2457), 1074)
+	assertMoneyValue(t, x.Div(0.871), 1536)
+	assertMoneyValue(t, x.Div(541.544), 3)
+
 	x, _ = GBP(-114)
 	assertMoneyValue(t, x.Div(1.2457), -92)
 	assertMoneyValue(t, x.Div(0.872), -131)
+	assertMoneyValue(t, x.Div(541.543), 0)
+
+	x, _ = FromSubunits("GBP", -114, roundUp)
+	assertMoneyValue(t, x.Div(1.2457), -91)
+	assertMoneyValue(t, x.Div(0.872), -130)
 	assertMoneyValue(t, x.Div(541.543), 0)
 }
 

@@ -41,12 +41,12 @@ func (m Money) String() string {
 
 // GBP is a helper function.
 func GBP(value int64) (Money, error) {
-	return FromSubunits("GBP", value, roundHalfUp)
+	return FromSubunits("GBP", value, nil)
 }
 
 // EUR is a helper function.
 func EUR(value int64) (Money, error) {
-	return FromSubunits("EUR", value, roundHalfUp)
+	return FromSubunits("EUR", value, nil)
 }
 
 // FromSubunits constructs a new money object from an integer. The integer used
@@ -55,6 +55,9 @@ func FromSubunits(currencyCode string, value int64, f roundFunc) (Money, error) 
 	curr, ok := currencyFormats[currencyCode]
 	if !ok {
 		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currencyCode)
+	}
+	if f == nil {
+		f = roundHalfUp
 	}
 	m := Money{
 		format: curr,
@@ -71,6 +74,11 @@ func FromString(currencyCode string, str string, f roundFunc) (Money, error) {
 	if !ok {
 		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currencyCode)
 	}
+	if f == nil {
+		f = roundHalfUp
+	}
+
+	isNegative := strings.Index(str, "-") != -1
 
 	// Remove everything before the first number and after the last number.
 	re := regexp.MustCompile("^.*?([0-9].*[0-9]).*$")
@@ -86,6 +94,10 @@ func FromString(currencyCode string, str string, f roundFunc) (Money, error) {
 			str = strings.ReplaceAll(str, curr.subSep, "")
 		}
 		str = strings.ReplaceAll(str, curr.thouSep, "")
+	}
+
+	if isNegative {
+		str = "-" + str
 	}
 
 	value, err := strconv.ParseInt(str, 10, 64)
@@ -124,10 +136,9 @@ func (m Money) Sub(v Money) Money {
 	return m
 }
 
-// Mul is an arithmetic operator. This operation will perform rounding of the
-// resulting value if necessary.
-func (m Money) Mul(f float64) Money {
-	m.value = m.round(float64(m.value) * f)
+// Mul is an arithmetic operator.
+func (m Money) Mul(n int64) Money {
+	m.value = m.value * n
 	return m
 }
 

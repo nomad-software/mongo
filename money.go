@@ -8,53 +8,23 @@ import (
 	"strings"
 )
 
-// Money is the main structure that holds the monetary value.
+// Money is the main structure that holds a monetary value and how to format it
+// as a string.
 type Money struct {
 	format currencyFormat // The currency format object.
 	value  int64          // The monetary value as a integer.
 	round  roundFunc      // The rounding function to use for division and multiplication.
 }
 
-// String is an implementation of fmt.Stringer and returns the string
-// formatted representation of the monetary value.
-func (m Money) String() string {
-	str := strconv.FormatInt(m.value, 10)
-
-	if len(str) <= m.format.subunits {
-		str = strings.Repeat("0", m.format.subunits-len(str)+1) + str
-	}
-
-	if m.format.thouSep != "" {
-		for i := len(str) - m.format.subunits - 3; i > 0; i -= 3 {
-			str = str[:i] + m.format.thouSep + str[i:]
-		}
-	}
-
-	if m.format.subunits > 0 {
-		str = str[:len(str)-m.format.subunits] + m.format.subSep + str[len(str)-m.format.subunits:]
-	}
-
-	str = strings.Replace(m.format.format, "0", str, 1)
-
-	return str
-}
-
-// GBP is a helper function.
-func GBP(value int64) (Money, error) {
-	return FromSubunits("GBP", value, nil)
-}
-
-// EUR is a helper function.
-func EUR(value int64) (Money, error) {
-	return FromSubunits("EUR", value, nil)
-}
-
 // FromSubunits constructs a new money object from an integer. The integer used
 // should contain the subunits of the currency.
-func FromSubunits(currencyCode string, value int64, f roundFunc) (Money, error) {
-	curr, ok := currencyFormats[currencyCode]
+// currIsoCode is an ISO 4217 currency code.
+// value is monetary value in subunits.
+// roundFunc is a function to be used for division operations.
+func FromSubunits(currIsoCode string, value int64, f roundFunc) (Money, error) {
+	curr, ok := currencyFormats[currIsoCode]
 	if !ok {
-		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currencyCode)
+		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currIsoCode)
 	}
 	if f == nil {
 		f = roundHalfUp
@@ -69,10 +39,13 @@ func FromSubunits(currencyCode string, value int64, f roundFunc) (Money, error) 
 
 // FromString constructs a new money object from a string. Everything not
 // contained within a number is stripped out before parsing.
-func FromString(currencyCode string, str string, f roundFunc) (Money, error) {
-	curr, ok := currencyFormats[currencyCode]
+// currIsoCode is an ISO 4217 currency code.
+// value is monetary value in subunits.
+// roundFunc is a function to be used for division operations.
+func FromString(currIsoCode string, str string, f roundFunc) (Money, error) {
+	curr, ok := currencyFormats[currIsoCode]
 	if !ok {
-		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currencyCode)
+		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currIsoCode)
 	}
 	if f == nil {
 		f = roundHalfUp
@@ -114,12 +87,25 @@ func FromString(currencyCode string, str string, f roundFunc) (Money, error) {
 	return m, nil
 }
 
-// AssertSameCurrency will panic if the arguments are money objects containing
-// different currencies.
-func assertSameCurrency(a, b Money) {
-	if a.format.code != b.format.code {
-		panic("Failed to perform operation on different currencies")
-	}
+// GBP is a helper function.
+func GBP(value int64) (Money, error) {
+	return FromSubunits("GBP", value, nil)
+}
+
+// EUR is a helper function.
+func EUR(value int64) (Money, error) {
+	return FromSubunits("EUR", value, nil)
+}
+
+// IsoCode returns the ISO 4217 currency code.
+func (m Money) IsoCode() string {
+	return m.format.code
+}
+
+// Value returns the entire monetary value expressed in subunits.
+// For example, using GBP this would be pence, using EUR would be cents.
+func (m Money) Value() int64 {
+	return m.value
 }
 
 // Add is an arithmetic operator.
@@ -258,4 +244,32 @@ func (m Money) Allocate(ratios ...int64) []Money {
 func (m Money) MarshalJSON() ([]byte, error) {
 	json := fmt.Sprintf(`{"currency": "%s", "formatted":"%s"}`, m.format.code, m.String())
 	return []byte(json), nil
+}
+
+// String is an implementation of fmt.Stringer and returns the string
+// formatted representation of the monetary value.
+func (m Money) String() string {
+	return strings.Replace(m.format.template, "0", m.StringNoSymbol(), 1)
+}
+
+// StringNoSymbol is an implementation of fmt.Stringer and returns the string
+// formatted representation of the monetary value without a currency symbol.
+func (m Money) StringNoSymbol() string {
+	str := strconv.FormatInt(m.value, 10)
+
+	if len(str) <= m.format.subunits {
+		str = strings.Repeat("0", m.format.subunits-len(str)+1) + str
+	}
+
+	if m.format.thouSep != "" {
+		for i := len(str) - m.format.subunits - 3; i > 0; i -= 3 {
+			str = str[:i] + m.format.thouSep + str[i:]
+		}
+	}
+
+	if m.format.subunits > 0 {
+		str = str[:len(str)-m.format.subunits] + m.format.subSep + str[len(str)-m.format.subunits:]
+	}
+
+	return str
 }

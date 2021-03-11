@@ -8,13 +8,13 @@ import (
 
 func TestGBP(t *testing.T) {
 	m, _ := GBP(11)
-	assertMoneyFormat(t, m, "GBP", "£0.11")
+	assertMoneyString(t, m, "GBP", "£0.11")
 	assertMoneyValue(t, m, 11)
 }
 
 func TestEUR(t *testing.T) {
 	m, _ := EUR(22)
-	assertMoneyFormat(t, m, "EUR", "€0.22")
+	assertMoneyString(t, m, "EUR", "€0.22")
 	assertMoneyValue(t, m, 22)
 }
 
@@ -23,15 +23,15 @@ func TestScenario(t *testing.T) {
 	net := gross.Div(1.2)
 	tax := gross.Sub(net)
 
-	assertMoneyFormat(t, gross, "GBP", "£10.59")
-	assertMoneyFormat(t, net, "GBP", "£8.83")
-	assertMoneyFormat(t, tax, "GBP", "£1.76")
+	assertMoneyString(t, gross, "GBP", "£10.59")
+	assertMoneyString(t, net, "GBP", "£8.83")
+	assertMoneyString(t, tax, "GBP", "£1.76")
 
 	assertMoneyValue(t, net.Add(tax), 1059)
-	assertMoneyFormat(t, net.Add(tax), "GBP", "£10.59")
+	assertMoneyString(t, net.Add(tax), "GBP", "£10.59")
 }
 
-func TestFromSubunits(t *testing.T) {
+func TestFromSubunitsError(t *testing.T) {
 	m, err := FromSubunits("XXX", 1457, roundHalfUp)
 	if err == nil {
 		t.Errorf("FromSubunits failed to error on code 'XXX'")
@@ -45,7 +45,7 @@ func TestFromSubunits(t *testing.T) {
 	assertMoneyValue(t, m, 1457)
 }
 
-func TestFromString(t *testing.T) {
+func TestFromStringError(t *testing.T) {
 	m, err := FromString("XXX", "14.57", roundHalfUp)
 	if err == nil {
 		t.Errorf("FromSubunits failed to error on code 'XXX'")
@@ -429,40 +429,5 @@ func TestJsonMarshalling(t *testing.T) {
 func assert(t *testing.T, b bool) {
 	if !b {
 		t.Errorf("Failed asserting true in test '%s'\n", t.Name())
-	}
-}
-
-func assertValue(t *testing.T, value, expected int64) {
-	if value != expected {
-		t.Errorf("Failed asserting %d = %d (expected)\n", value, expected)
-	}
-}
-
-func assertMoneyValue(t *testing.T, m Money, expected int64) {
-	if m.value != expected {
-		t.Errorf("Failed asserting %d = %d (expected)\n", m.value, expected)
-	}
-}
-
-func assertMoneyFormat(t *testing.T, m Money, code string, formatted string) {
-	if m.format.code != code {
-		t.Errorf("Failed asserting %s = %s (expected)\n", m.format.code, code)
-	}
-
-	if m.String() != formatted {
-		t.Errorf("Failed asserting %s = %s (expected)\n", m.String(), formatted)
-	}
-}
-
-func assertJSON(t *testing.T, value []byte, expected string) {
-	if string(value) != expected {
-		t.Errorf("Failed asserting %s = %s (expected)\n", value, expected)
-	}
-}
-
-func assertPanic(t *testing.T) {
-	r := recover()
-	if r == nil {
-		t.Errorf("Failed asserting panic in test '%s'\n", t.Name())
 	}
 }

@@ -87,5 +87,5 @@ Pot: £1.00, Allocations: [£0.17 £0.33 £0.50]
 
 ## Caveat
 
-Apart from the unit tests, this library is completely untested and written
-for the fun of it. Feedback welcome!
+Apart from the unit tests, this library is completely untested in production
+and written for the fun of it. Feedback welcome!

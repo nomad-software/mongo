@@ -51,7 +51,7 @@ func FromString(currIsoCode string, str string, f roundFunc) (Money, error) {
 		f = roundHalfUp
 	}
 
-	isNegative := strings.Index(str, "-") != -1
+	isNegative := strings.Contains(str, "-")
 
 	// Remove everything before the first number and after the last number.
 	re := regexp.MustCompile("^.*?([0-9].*[0-9]).*$")
@@ -108,6 +108,24 @@ func (m Money) Value() int64 {
 	return m.value
 }
 
+// Units returns only the monetary units.
+func (m Money) Units() int64 {
+	if m.format.subunits == 0 {
+		return m.value
+	}
+	units := [...]int64{0, 10, 100, 1000, 10000}
+	return (m.value - m.Subunits()) / units[m.format.subunits]
+}
+
+// Subunits returns only the monetary subunits.
+func (m Money) Subunits() int64 {
+	if m.format.subunits == 0 {
+		return 0
+	}
+	units := [...]int64{0, 10, 100, 1000, 10000}
+	return m.value % units[m.format.subunits]
+}
+
 // Add is an arithmetic operator.
 func (m Money) Add(v Money) Money {
 	assertSameCurrency(m, v)
@@ -139,8 +157,15 @@ func (m Money) Div(f float64) Money {
 // Abs returns a money object with an absolute value.
 func (m Money) Abs() Money {
 	if m.value < 0 {
-		m.value = -m.value
+		return m.FlipSign()
 	}
+	return m
+}
+
+// FlipSign flips the sign of the money object's value. Switching positive to
+// negative and vice versa.
+func (m Money) FlipSign() Money {
+	m.value = -m.value
 	return m
 }
 
@@ -148,6 +173,12 @@ func (m Money) Abs() Money {
 func (m Money) Eq(v Money) bool {
 	assertSameCurrency(m, v)
 	return m.value == v.value
+}
+
+// Neq is a logical operator.
+func (m Money) Neq(v Money) bool {
+	assertSameCurrency(m, v)
+	return m.value != v.value
 }
 
 // Gt is a logical operator.

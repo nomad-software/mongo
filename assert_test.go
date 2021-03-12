@@ -11,8 +11,18 @@ func assertValue(t *testing.T, value, expected int64) {
 }
 
 func assertMoneyValue(t *testing.T, m Money, expected int64) {
-	if m.value != expected {
+	if m.Value() != expected {
 		t.Errorf("Failed asserting %d = %d (expected)\n", m.Value(), expected)
+	}
+}
+
+func assertMoneyUnits(t *testing.T, m Money, units, subunits int64) {
+	if m.Units() != units {
+		t.Errorf("Failed asserting units %d = %d (expected)\n", m.Units(), units)
+	}
+
+	if m.Subunits() != subunits {
+		t.Errorf("Failed asserting subunits %d = %d (expected)\n", m.Subunits(), subunits)
 	}
 }
 

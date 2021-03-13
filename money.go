@@ -283,8 +283,8 @@ func (m Money) String() string {
 	return strings.Replace(m.format.template, "0", m.StringNoSymbol(), 1)
 }
 
-// StringNoSymbol is an implementation of fmt.Stringer and returns the string
-// formatted representation of the monetary value without a currency symbol.
+// StringNoSymbol returns the string formatted representation of the monetary
+// value without a currency symbol.
 func (m Money) StringNoSymbol() string {
 	str := strconv.FormatInt(m.value, 10)
 

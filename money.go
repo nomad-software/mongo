@@ -113,7 +113,7 @@ func (m Money) Units() int64 {
 	if m.format.subunits == 0 {
 		return m.value
 	}
-	units := [...]int64{0, 10, 100, 1000, 10000}
+	units := [5]int64{0, 10, 100, 1000, 10000}
 	return (m.value - m.Subunits()) / units[m.format.subunits]
 }
 
@@ -122,7 +122,7 @@ func (m Money) Subunits() int64 {
 	if m.format.subunits == 0 {
 		return 0
 	}
-	units := [...]int64{0, 10, 100, 1000, 10000}
+	units := [5]int64{0, 10, 100, 1000, 10000}
 	return m.value % units[m.format.subunits]
 }
 

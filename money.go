@@ -24,7 +24,7 @@ type Money struct {
 func FromSubunits(currIsoCode string, value int64, f roundFunc) (Money, error) {
 	curr, ok := currencyFormats[currIsoCode]
 	if !ok {
-		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currIsoCode)
+		return Money{}, fmt.Errorf("the currency code '%s' is not recognised", currIsoCode)
 	}
 	if f == nil {
 		f = roundHalfUp
@@ -45,7 +45,7 @@ func FromSubunits(currIsoCode string, value int64, f roundFunc) (Money, error) {
 func FromString(currIsoCode string, str string, f roundFunc) (Money, error) {
 	curr, ok := currencyFormats[currIsoCode]
 	if !ok {
-		return Money{}, fmt.Errorf("The currency code '%s' is not recognised", currIsoCode)
+		return Money{}, fmt.Errorf("the currency code '%s' is not recognised", currIsoCode)
 	}
 	if f == nil {
 		f = roundHalfUp
@@ -62,7 +62,7 @@ func FromString(currIsoCode string, str string, f roundFunc) (Money, error) {
 		// currency, we expect to see a subunit separator.
 		if len(str) > curr.subunits {
 			if string(str[len(str)-(curr.subunits+1)]) != curr.subSep {
-				return Money{}, fmt.Errorf("Failed to parse string to money, no subunits defined")
+				return Money{}, fmt.Errorf("failed to parse string to money, no subunits defined")
 			}
 			str = strings.ReplaceAll(str, curr.subSep, "")
 		}

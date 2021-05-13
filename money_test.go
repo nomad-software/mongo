@@ -520,9 +520,3 @@ func TestJsonMarshalling(t *testing.T) {
 	bytes, _ = json.Marshal(resp)
 	assertJSON(t, bytes, `{"name":"Widget","cost":{"currency":"GBP","formatted":"£10.99"}}`)
 }
-
-func assert(t *testing.T, b bool) {
-	if !b {
-		t.Errorf("Failed asserting true in test '%s'\n", t.Name())
-	}
-}

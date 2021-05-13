@@ -4,6 +4,12 @@ import (
 	"testing"
 )
 
+func assert(t *testing.T, b bool) {
+	if !b {
+		t.Errorf("Failed asserting true in test '%s'\n", t.Name())
+	}
+}
+
 func assertValue(t *testing.T, value, expected int64) {
 	if value != expected {
 		t.Errorf("Failed asserting %d = %d (expected)\n", value, expected)

@@ -27,7 +27,7 @@ func FromSubunits(currIsoCode string, value int64, f roundFunc) (Money, error) {
 		return Money{}, fmt.Errorf("the currency code '%s' is not recognised", currIsoCode)
 	}
 	if f == nil {
-		f = roundHalfUp
+		f = RoundHalfUp
 	}
 	m := Money{
 		format: curr,
@@ -48,7 +48,7 @@ func FromString(currIsoCode string, str string, f roundFunc) (Money, error) {
 		return Money{}, fmt.Errorf("the currency code '%s' is not recognised", currIsoCode)
 	}
 	if f == nil {
-		f = roundHalfUp
+		f = RoundHalfUp
 	}
 
 	isNegative := strings.Contains(str, "-")

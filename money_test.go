@@ -32,12 +32,12 @@ func TestScenario(t *testing.T) {
 }
 
 func TestFromSubunitsError(t *testing.T) {
-	m, err := FromSubunits("XXX", 1457, roundHalfUp)
+	m, err := FromSubunits("XXX", 1457, RoundHalfUp)
 	if err == nil {
 		t.Errorf("FromSubunits failed to error on code 'XXX'")
 	}
 
-	m, err = FromSubunits("GBP", 1457, roundHalfToEven)
+	m, err = FromSubunits("GBP", 1457, RoundHalfToEven)
 	if err != nil {
 		t.Errorf("FromSubunits failed to recognise code 'GBP'")
 	}
@@ -46,12 +46,12 @@ func TestFromSubunitsError(t *testing.T) {
 }
 
 func TestFromStringError(t *testing.T) {
-	m, err := FromString("XXX", "14.57", roundHalfUp)
+	m, err := FromString("XXX", "14.57", RoundHalfUp)
 	if err == nil {
 		t.Errorf("FromSubunits failed to error on code 'XXX'")
 	}
 
-	m, err = FromString("GBP", "14.57", roundHalfUp)
+	m, err = FromString("GBP", "14.57", RoundHalfUp)
 	if err != nil {
 		t.Errorf("FromSubunits failed to recognise code 'GBP'")
 	}
@@ -60,48 +60,48 @@ func TestFromStringError(t *testing.T) {
 }
 
 func TestFromStringFormats(t *testing.T) {
-	m, _ := FromString("GBP", "-£1,451.39", roundHalfUp)
+	m, _ := FromString("GBP", "-£1,451.39", RoundHalfUp)
 	assertMoneyValue(t, m, -145139)
 
-	m, _ = FromString("EUR", "-127.54 €", roundHalfUp)
+	m, _ = FromString("EUR", "-127.54 €", RoundHalfUp)
 	assertMoneyValue(t, m, -12754)
 
-	m, _ = FromString("DKK", "kr-127,54", roundHalfUp)
+	m, _ = FromString("DKK", "kr-127,54", RoundHalfUp)
 	assertMoneyValue(t, m, -12754)
 
-	m, _ = FromString("EUR", "€ 127.54-", roundHalfUp)
+	m, _ = FromString("EUR", "€ 127.54-", RoundHalfUp)
 	assertMoneyValue(t, m, -12754)
 
-	m, _ = FromString("JPY", "¥145139", roundHalfUp)
+	m, _ = FromString("JPY", "¥145139", RoundHalfUp)
 	assertMoneyValue(t, m, 145139)
 
-	m, _ = FromString("EUR", "€14.57", roundHalfUp)
+	m, _ = FromString("EUR", "€14.57", RoundHalfUp)
 	assertMoneyValue(t, m, 1457)
 
-	m, _ = FromString("JOD", "2,462.486 د.أ", roundHalfUp)
+	m, _ = FromString("JOD", "2,462.486 د.أ", RoundHalfUp)
 	assertMoneyValue(t, m, 2462486)
 
-	m, _ = FromString("CLF", "UF157.896,4418", roundHalfUp)
+	m, _ = FromString("CLF", "UF157.896,4418", RoundHalfUp)
 	assertMoneyValue(t, m, 1578964418)
 }
 
 func TestFromStringErrors(t *testing.T) {
-	_, err := FromString("JPY", "145139.0", roundHalfUp)
+	_, err := FromString("JPY", "145139.0", RoundHalfUp)
 	if err == nil {
 		t.Errorf("FromString failed to error on subunits on a currency that doesn't support them")
 	}
 
-	_, err = FromString("EUR", "14.570", roundHalfUp)
+	_, err = FromString("EUR", "14.570", RoundHalfUp)
 	if err == nil {
 		t.Errorf("FromString failed to error on too many subunits defined")
 	}
 
-	_, err = FromString("JOD", "2,462.48", roundHalfUp)
+	_, err = FromString("JOD", "2,462.48", RoundHalfUp)
 	if err == nil {
 		t.Errorf("FromString failed to error on too few subunits defined")
 	}
 
-	_, err = FromString("CLF", "1578964418", roundHalfUp)
+	_, err = FromString("CLF", "1578964418", RoundHalfUp)
 	if err == nil {
 		t.Errorf("FromString failed to error on no subunits defined")
 	}
@@ -297,7 +297,7 @@ func TestDiv(t *testing.T) {
 	assertMoneyValue(t, x.Div(0.871), 1535)
 	assertMoneyValue(t, x.Div(541.544), 2)
 
-	x, _ = FromSubunits("GBP", 1337, roundUp)
+	x, _ = FromSubunits("GBP", 1337, RoundUp)
 	assertMoneyValue(t, x.Div(1.2457), 1074)
 	assertMoneyValue(t, x.Div(0.871), 1536)
 	assertMoneyValue(t, x.Div(541.544), 3)
@@ -307,7 +307,7 @@ func TestDiv(t *testing.T) {
 	assertMoneyValue(t, x.Div(0.872), -131)
 	assertMoneyValue(t, x.Div(541.543), 0)
 
-	x, _ = FromSubunits("GBP", -114, roundUp)
+	x, _ = FromSubunits("GBP", -114, RoundUp)
 	assertMoneyValue(t, x.Div(1.2457), -91)
 	assertMoneyValue(t, x.Div(0.872), -130)
 	assertMoneyValue(t, x.Div(541.543), 0)

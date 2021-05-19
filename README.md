@@ -28,7 +28,7 @@ import (
 
 func main() {
 
-	cost, err := mongo.GBP(1059)
+	cost, err := mongo.MoneyGBP(1059)
 
 	if err != nil {
 		log.Fatal("Error occured creating money")
@@ -64,7 +64,7 @@ import (
 
 func main() {
 
-	pot, err := mongo.GBP(100)
+	pot, err := mongo.MoneyGBP(100)
 
 	if err != nil {
 		log.Fatal("Error occured creating money")

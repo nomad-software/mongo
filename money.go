@@ -16,12 +16,12 @@ type Money struct {
 	round  roundFunc      // The rounding function to use for division and multiplication.
 }
 
-// FromSubunits constructs a new money object from an integer. The integer used
-// should contain the subunits of the currency.
+// MoneyFromSubunits constructs a new money object from an integer. The integer
+// used should represent the subunits of the currency.
 // currIsoCode is an ISO 4217 currency code.
 // value is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
-func FromSubunits(currIsoCode string, value int64, f roundFunc) (Money, error) {
+func MoneyFromSubunits(currIsoCode string, value int64, f roundFunc) (Money, error) {
 	curr, ok := currencyFormats[currIsoCode]
 	if !ok {
 		return Money{}, fmt.Errorf("the currency code '%s' is not recognised", currIsoCode)
@@ -37,12 +37,12 @@ func FromSubunits(currIsoCode string, value int64, f roundFunc) (Money, error) {
 	return m, nil
 }
 
-// FromString constructs a new money object from a string. Everything not
+// MoneyFromString constructs a new money object from a string. Everything not
 // contained within a number is stripped out before parsing.
 // currIsoCode is an ISO 4217 currency code.
 // value is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
-func FromString(currIsoCode string, str string, f roundFunc) (Money, error) {
+func MoneyFromString(currIsoCode string, str string, f roundFunc) (Money, error) {
 	curr, ok := currencyFormats[currIsoCode]
 	if !ok {
 		return Money{}, fmt.Errorf("the currency code '%s' is not recognised", currIsoCode)
@@ -87,14 +87,14 @@ func FromString(currIsoCode string, str string, f roundFunc) (Money, error) {
 	return m, nil
 }
 
-// GBP is a helper function.
-func GBP(value int64) (Money, error) {
-	return FromSubunits("GBP", value, nil)
+// MoneyGBP is a helper function.
+func MoneyGBP(value int64) (Money, error) {
+	return MoneyFromSubunits("GBP", value, nil)
 }
 
-// EUR is a helper function.
-func EUR(value int64) (Money, error) {
-	return FromSubunits("EUR", value, nil)
+// MoneyEUR is a helper function.
+func MoneyEUR(value int64) (Money, error) {
+	return MoneyFromSubunits("EUR", value, nil)
 }
 
 // IsoCode returns the ISO 4217 currency code.
@@ -232,11 +232,11 @@ func (m Money) Split(n int64) []Money {
 	var i int64
 	for i = 0; i < n; i++ {
 		if rem > 0 {
-			piece, _ := FromSubunits(m.format.code, value+1, m.round)
+			piece, _ := MoneyFromSubunits(m.format.code, value+1, m.round)
 			rem--
 			s = append(s, piece)
 		} else {
-			piece, _ := FromSubunits(m.format.code, value, m.round)
+			piece, _ := MoneyFromSubunits(m.format.code, value, m.round)
 			s = append(s, piece)
 		}
 	}
@@ -259,7 +259,7 @@ func (m Money) Allocate(ratios ...int64) []Money {
 	var allocated int64 = 0
 	for _, n := range ratios {
 		value := m.value * n / sum
-		piece, _ := FromSubunits(m.format.code, value, m.round)
+		piece, _ := MoneyFromSubunits(m.format.code, value, m.round)
 		s = append(s, piece)
 		allocated += value
 	}

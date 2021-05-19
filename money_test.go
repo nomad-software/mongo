@@ -256,7 +256,7 @@ func TestCurrencyPanicOnLte(t *testing.T) {
 	x.Lte(y)
 }
 
-func TestAdd(t *testing.T) {
+func TestMoneyAdd(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(33)
 	assertMoneyValue(t, x.Add(y), 100)
@@ -266,7 +266,7 @@ func TestAdd(t *testing.T) {
 	assertMoneyValue(t, x.Add(y), -3)
 }
 
-func TestSub(t *testing.T) {
+func TestMoneySub(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(33)
 	assertMoneyValue(t, x.Sub(y), 34)
@@ -276,7 +276,7 @@ func TestSub(t *testing.T) {
 	assertMoneyValue(t, x.Sub(y), -6)
 }
 
-func TestMul(t *testing.T) {
+func TestMoneyMul(t *testing.T) {
 	x, _ := MoneyGBP(1337)
 	assertMoneyValue(t, x.Mul(0), 0)
 	assertMoneyValue(t, x.Mul(1), 1337)
@@ -291,7 +291,7 @@ func TestMul(t *testing.T) {
 	assertMoneyValue(t, x.Mul(5), 500)
 }
 
-func TestDiv(t *testing.T) {
+func TestMoneyDiv(t *testing.T) {
 	x, _ := MoneyGBP(1337)
 	assertMoneyValue(t, x.Div(1.2457), 1073)
 	assertMoneyValue(t, x.Div(0.871), 1535)
@@ -313,7 +313,7 @@ func TestDiv(t *testing.T) {
 	assertMoneyValue(t, x.Div(541.543), 0)
 }
 
-func TestAbs(t *testing.T) {
+func TestMoneyAbs(t *testing.T) {
 	w, _ := MoneyGBP(-5434651)
 	x, _ := MoneyGBP(2464125665)
 	y, _ := MoneyGBP(-9007199254740992646)
@@ -324,7 +324,7 @@ func TestAbs(t *testing.T) {
 	assertMoneyValue(t, z.Abs(), math.MaxInt64)
 }
 
-func TestFlipSign(t *testing.T) {
+func TestMoneyFlipSign(t *testing.T) {
 	x, _ := MoneyGBP(1337)
 	assertMoneyValue(t, x.FlipSign(), -1337)
 
@@ -332,7 +332,7 @@ func TestFlipSign(t *testing.T) {
 	assertMoneyValue(t, x.FlipSign(), 114)
 }
 
-func TestEq(t *testing.T) {
+func TestMoneyEq(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(33)
 	assert(t, !x.Eq(y))
@@ -342,7 +342,7 @@ func TestEq(t *testing.T) {
 	assert(t, x.Eq(y))
 }
 
-func TestNeq(t *testing.T) {
+func TestMoneyNeq(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(33)
 	assert(t, x.Neq(y))
@@ -352,7 +352,7 @@ func TestNeq(t *testing.T) {
 	assert(t, !x.Neq(y))
 }
 
-func TestGt(t *testing.T) {
+func TestMoneyGt(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(33)
 	assert(t, x.Gt(y))
@@ -366,7 +366,7 @@ func TestGt(t *testing.T) {
 	assert(t, !x.Gt(y))
 }
 
-func TestGte(t *testing.T) {
+func TestMoneyGte(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(33)
 	assert(t, x.Gte(y))
@@ -380,7 +380,7 @@ func TestGte(t *testing.T) {
 	assert(t, !x.Gte(y))
 }
 
-func TestLt(t *testing.T) {
+func TestMoneyLt(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(33)
 	assert(t, !x.Lt(y))
@@ -394,7 +394,7 @@ func TestLt(t *testing.T) {
 	assert(t, x.Lt(y))
 }
 
-func TestLte(t *testing.T) {
+func TestMoneyLte(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(33)
 	assert(t, !x.Lte(y))
@@ -408,14 +408,14 @@ func TestLte(t *testing.T) {
 	assert(t, x.Lte(y))
 }
 
-func TestIsZero(t *testing.T) {
+func TestMoneyIsZero(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(0)
 	assert(t, !x.IsZero())
 	assert(t, y.IsZero())
 }
 
-func TestIsPositive(t *testing.T) {
+func TestMoneyIsPositive(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(0)
 	z, _ := MoneyGBP(-5)
@@ -424,7 +424,7 @@ func TestIsPositive(t *testing.T) {
 	assert(t, !z.IsPos())
 }
 
-func TestIsNegative(t *testing.T) {
+func TestMoneyIsNegative(t *testing.T) {
 	x, _ := MoneyGBP(67)
 	y, _ := MoneyGBP(0)
 	z, _ := MoneyGBP(-5)
@@ -433,13 +433,13 @@ func TestIsNegative(t *testing.T) {
 	assert(t, z.IsNeg())
 }
 
-func TestSplitDivideByZero(t *testing.T) {
+func TestMoneySplitDivideByZero(t *testing.T) {
 	x, _ := MoneyGBP(100)
 	defer assertPanic(t)
 	x.Split(0)
 }
 
-func TestSplit(t *testing.T) {
+func TestMoneySplit(t *testing.T) {
 	x, _ := MoneyGBP(100)
 	s := x.Split(3)
 	assertMoneyValue(t, s[0], 34)
@@ -456,19 +456,19 @@ func TestSplit(t *testing.T) {
 	assertMoneyValue(t, s[0].Add(s[1]).Add(s[2]).Add(s[3]), 123)
 }
 
-func TestAllocateByZero(t *testing.T) {
+func TestMoneyAllocateByZero(t *testing.T) {
 	x, _ := MoneyGBP(100)
 	defer assertPanic(t)
 	x.Allocate(0)
 }
 
-func TestAllocateEmpty(t *testing.T) {
+func TestMoneyAllocateEmpty(t *testing.T) {
 	x, _ := MoneyGBP(100)
 	defer assertPanic(t)
 	x.Allocate()
 }
 
-func TestAllocate(t *testing.T) {
+func TestMoneyAllocate(t *testing.T) {
 	x, _ := MoneyGBP(100)
 	s := x.Allocate(1, 1, 1)
 	assertMoneyValue(t, s[0], 34)

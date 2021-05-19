@@ -128,14 +128,14 @@ func (m Money) Subunits() int64 {
 
 // Add is an arithmetic operator.
 func (m Money) Add(v Money) Money {
-	assertSameCurrency(m, v)
+	assertSameMoneyCurrency(m, v)
 	m.value += v.value
 	return m
 }
 
 // Sub is an arithmetic operator.
 func (m Money) Sub(v Money) Money {
-	assertSameCurrency(m, v)
+	assertSameMoneyCurrency(m, v)
 	m.value -= v.value
 	return m
 }
@@ -171,37 +171,37 @@ func (m Money) FlipSign() Money {
 
 // Eq is a logical operator.
 func (m Money) Eq(v Money) bool {
-	assertSameCurrency(m, v)
+	assertSameMoneyCurrency(m, v)
 	return m.value == v.value
 }
 
 // Neq is a logical operator.
 func (m Money) Neq(v Money) bool {
-	assertSameCurrency(m, v)
+	assertSameMoneyCurrency(m, v)
 	return m.value != v.value
 }
 
 // Gt is a logical operator.
 func (m Money) Gt(v Money) bool {
-	assertSameCurrency(m, v)
+	assertSameMoneyCurrency(m, v)
 	return m.value > v.value
 }
 
 // Gte is a logical operator.
 func (m Money) Gte(v Money) bool {
-	assertSameCurrency(m, v)
+	assertSameMoneyCurrency(m, v)
 	return m.value >= v.value
 }
 
 // Lt is a logical operator.
 func (m Money) Lt(v Money) bool {
-	assertSameCurrency(m, v)
+	assertSameMoneyCurrency(m, v)
 	return m.value < v.value
 }
 
 // Lte is a logical operator.
 func (m Money) Lte(v Money) bool {
-	assertSameCurrency(m, v)
+	assertSameMoneyCurrency(m, v)
 	return m.value <= v.value
 }
 

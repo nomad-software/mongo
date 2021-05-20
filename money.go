@@ -147,8 +147,9 @@ func (m Money) Mul(n int64) Money {
 }
 
 // Div is an arithmetic operator. This operation will perform rounding of the
-// resulting value if necessary. If you need to accurately divide a money object
-// with lossless precision, use the Split or Allocate function instead.
+// resulting value using the assigned rounding function. If you need to
+// accurately divide a money object with lossless precision, use the Split or
+// Allocate functions instead.
 func (m Money) Div(f float64) Money {
 	m.value = m.round(float64(m.value) / f)
 	return m

@@ -16,6 +16,12 @@ func assertValue(t *testing.T, value, expected int64) {
 	}
 }
 
+func assertTax(t *testing.T, value, expected float64) {
+	if value != expected {
+		t.Errorf("Failed asserting %f = %f (expected)\n", value, expected)
+	}
+}
+
 func assertMoneyValue(t *testing.T, m Money, expected int64) {
 	if m.Value() != expected {
 		t.Errorf("Failed asserting %d = %d (expected)\n", m.Value(), expected)
@@ -42,6 +48,16 @@ func assertMoneyString(t *testing.T, m Money, code string, formatted string) {
 	}
 }
 
+func assertPriceString(t *testing.T, p Price, code string, formatted string) {
+	if p.IsoCode() != code {
+		t.Errorf("Failed asserting code %s = %s (expected)\n", p.IsoCode(), code)
+	}
+
+	if p.String() != formatted {
+		t.Errorf("Failed asserting format %s = %s (expected)\n", p.String(), formatted)
+	}
+}
+
 func assertMoneyStringNoSymbol(t *testing.T, m Money, code string, formatted string) {
 	if m.IsoCode() != code {
 		t.Errorf("Failed asserting code %s = %s (expected)\n", m.IsoCode(), code)
@@ -49,6 +65,16 @@ func assertMoneyStringNoSymbol(t *testing.T, m Money, code string, formatted str
 
 	if m.StringNoSymbol() != formatted {
 		t.Errorf("Failed asserting format %s = %s (expected)\n", m.StringNoSymbol(), formatted)
+	}
+}
+
+func assertPriceStringNoSymbol(t *testing.T, p Price, code string, formatted string) {
+	if p.IsoCode() != code {
+		t.Errorf("Failed asserting code %s = %s (expected)\n", p.IsoCode(), code)
+	}
+
+	if p.StringNoSymbol() != formatted {
+		t.Errorf("Failed asserting format %s = %s (expected)\n", p.StringNoSymbol(), formatted)
 	}
 }
 

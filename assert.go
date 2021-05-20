@@ -11,15 +11,15 @@ func assertSameMoneyCurrency(a, b Money) {
 // assertSamePriceCurrency will panic if the arguments are price objects
 // containing different currencies.
 func assertSamePriceCurrency(a, b Price) {
-	if a.Gross.format.code != b.Gross.format.code {
+	if a.gross.format.code != b.gross.format.code {
 		panic("Failed to perform operation on different currencies")
 	}
 
-	if a.Net.format.code != b.Net.format.code {
+	if a.net.format.code != b.net.format.code {
 		panic("Failed to perform operation on different currencies")
 	}
 
-	if a.Tax.format.code != b.Tax.format.code {
+	if a.tax.format.code != b.tax.format.code {
 		panic("Failed to perform operation on different currencies")
 	}
 }

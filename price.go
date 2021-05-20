@@ -110,8 +110,8 @@ func (p Price) Tax() Money {
 	return p.tax
 }
 
-// TaxPercent returns the amount of tax deducted on creation of the price as a
-// percentage.
+// TaxPercent returns the amount of tax subtracted from the gross to produce the
+// net, as a percentage.
 func (p Price) TaxPercent() float64 {
 	return p.taxPercent
 }

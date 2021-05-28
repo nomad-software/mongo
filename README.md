@@ -6,8 +6,8 @@
 
 ## Overview
 
-Mongo is a straightforward money library for Go that can make it easy to
-handle bug prone arithmetic when dealing with money.
+Mongo is a straightforward money library for Go that makes it easy to handle the
+usually bug prone arithmetic when dealing with money.
 
 ## Documentation
 
@@ -28,17 +28,21 @@ import (
 
 func main() {
 
-	cost, err := mongo.MoneyGBP(1059)
+	m, err := mongo.MoneyGBP(1055)
 
 	if err != nil {
 		log.Fatal("Error occured creating money")
 	}
 
-	net := cost.Div(1.2)
-	tax := cost.Sub(net)
-	json, _ := json.Marshal(cost)
+	fmt.Printf("Money: %s\n", m)
 
-	fmt.Printf("cost: %s (net: %s, tax: %s)\n", cost, net, tax)
+	shares := m.Split(3)
+	fmt.Printf("Shares: %s\n", shares)
+
+	shares = m.Allocate(1, 2, 3)
+	fmt.Printf("Allocations: %s\n", shares)
+
+	json, _ := json.Marshal(m)
 	fmt.Println(string(json))
 }
 ```
@@ -46,8 +50,10 @@ func main() {
 ### Output
 
 ```
-cost: £10.59 (net: £8.83, tax: £1.76)
-{"currency":"GBP","formatted":"£10.59"}
+Money: £10.55
+Shares: [£3.52 £3.52 £3.51]
+Allocations: [£1.76 £3.52 £5.27]
+{"currency":"GBP","formatted":"£10.55"}
 ```
 
 ## Example 2
@@ -56,6 +62,7 @@ cost: £10.59 (net: £8.83, tax: £1.76)
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -64,28 +71,22 @@ import (
 
 func main() {
 
-	pot, err := mongo.MoneyGBP(100)
+	m, err := mongo.PriceGBP(1055, 17.5)
 
 	if err != nil {
-		log.Fatal("Error occured creating money")
+		log.Fatal("Error occured creating price")
 	}
 
-	shares := pot.Split(3)
-	fmt.Printf("Pot: %s, Shares: %s\n", pot, shares)
+	fmt.Printf("Price: %s\n", m)
 
-	shares = pot.Allocate(1, 2, 3)
-	fmt.Printf("Pot: %s, Allocations: %s\n", pot, shares)
+	json, _ := json.Marshal(m)
+	fmt.Println(string(json))
 }
 ```
 
 ### Output
 
 ```
-Pot: £1.00, Shares: [£0.34 £0.33 £0.33]
-Pot: £1.00, Allocations: [£0.17 £0.33 £0.50]
+Price: £10.55
+{"currency":"GBP","gross":"£10.55","net":"£8.98","tax":"£1.57","taxPercent":17.500000}
 ```
-
-## Caveat
-
-Apart from the unit tests, this library is completely untested in production
-and written for the fun of it. Feedback welcome!

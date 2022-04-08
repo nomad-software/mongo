@@ -11,7 +11,7 @@ usually bug prone arithmetic when dealing with money.
 
 ## Documentation
 
-https://pkg.go.dev/github.com/nomad-software/mongo#section-documentation
+https://pkg.go.dev/github.com/nomad-software/mongo@master#section-documentation
 
 ## Example 1
 

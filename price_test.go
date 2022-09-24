@@ -120,10 +120,10 @@ func TestPriceJsonMarshalling(t *testing.T) {
 	}
 
 	bytes, _ := json.Marshal(price)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"total":{"currency":"GBP","formatted":"£1.83"},"detail":[{"amount":{"currency":"GBP","formatted":"£1.83"},"description":"VAT"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"formatted":"£1.83","detail":[{"formatted":"£1.83","description":"VAT"}]}}`)
 
 	bytes, _ = json.Marshal(resp)
-	assertJSON(t, bytes, `{"name":"Widget","price":{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"total":{"currency":"GBP","formatted":"£1.83"},"detail":[{"amount":{"currency":"GBP","formatted":"£1.83"},"description":"VAT"}]}}}`)
+	assertJSON(t, bytes, `{"name":"Widget","price":{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"formatted":"£1.83","detail":[{"formatted":"£1.83","description":"VAT"}]}}}`)
 }
 
 func TestPriceString(t *testing.T) {

@@ -88,5 +88,5 @@ func main() {
 
 ```
 Price: £10.55
-{"currency":"GBP","gross":"£10.55","net":"£8.98","tax":{"total":{"currency":"GBP","formatted":"£1.57"},"detail":[{"amount":{"currency":"GBP","formatted":"£1.57"},"description":"VAT"}]}}
+{"currency":"GBP","gross":"£10.55","net":"£8.98","tax":{"formatted":"£1.57","detail":[{"formatted":"£1.57","description":"VAT"}]}}
 ```

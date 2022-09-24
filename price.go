@@ -28,8 +28,8 @@ func PriceFromSubunits(currIsoCode string, grossValue int64, f roundFunc) (Price
 	}
 
 	price.taxes = taxes{
-		Total:  price.gross.Clone(0),
-		Detail: make([]tax, 0),
+		total:  price.gross.Clone(0),
+		detail: make([]tax, 0),
 	}
 
 	return price, nil
@@ -51,8 +51,8 @@ func PriceFromString(currIsoCode string, grossValueStr string, f roundFunc) (Pri
 	}
 
 	price.taxes = taxes{
-		Total:  price.gross.Clone(0),
-		Detail: make([]tax, 0),
+		total:  price.gross.Clone(0),
+		detail: make([]tax, 0),
 	}
 
 	return price, nil
@@ -113,12 +113,12 @@ func (p Price) Gross() Money {
 // Net returns the net monetary value of the price which is equal to the gross
 // minus tax.
 func (p Price) Net() Money {
-	return p.gross.Sub(p.taxes.Total)
+	return p.gross.Sub(p.taxes.total)
 }
 
 // Tax returns the total amount of tax subtracted from the gross to produce the net.
 func (p Price) Tax() Money {
-	return p.taxes.Total
+	return p.taxes.total
 }
 
 // MarshalJSON is an implementation of json.Marshaller.

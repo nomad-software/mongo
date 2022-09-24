@@ -1,16 +1,15 @@
 package mongo
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
 // Price is a structure that holds a price and gives information about the
 // amount of tax applied to that price.
 type Price struct {
-	gross      Money   // The gross.
-	net        Money   // The net which is equal to the gross minus tax.
-	tax        Money   // The amount of tax subtracted from the gross to produce the net.
-	taxPercent float64 // The percentage of tax deducted.
+	gross Money // The gross.
+	taxes taxes // The amount of tax subtracted from the gross to produce the net.
 }
 
 // PriceFromSubunits constructs a new price object from an integer and tax
@@ -18,9 +17,8 @@ type Price struct {
 // currency.
 // currIsoCode is an ISO 4217 currency code.
 // value is monetary value in subunits.
-// taxPercent is the amount of tax applied to this price.
 // roundFunc is a function to be used for division operations.
-func PriceFromSubunits(currIsoCode string, grossValue int64, taxPercent float64, f roundFunc) (Price, error) {
+func PriceFromSubunits(currIsoCode string, grossValue int64, f roundFunc) (Price, error) {
 	var price Price
 	var err error
 
@@ -29,18 +27,9 @@ func PriceFromSubunits(currIsoCode string, grossValue int64, taxPercent float64,
 		return Price{}, err
 	}
 
-	price.taxPercent = taxPercent
-
-	if taxPercent < 0.0 || taxPercent > 100.0 {
-		return Price{}, fmt.Errorf("tax percent '%f' must be between 1 and 100", taxPercent)
-	}
-
-	if taxPercent < 100.0 {
-		price.net = price.gross.Div(1 + (taxPercent / 100))
-		price.tax = price.gross.Sub(price.net)
-	} else {
-		price.tax = price.gross
-		price.net = price.gross.Sub(price.tax)
+	price.taxes = taxes{
+		Total:  price.gross.Clone(0),
+		Detail: make([]tax, 0),
 	}
 
 	return price, nil
@@ -51,9 +40,8 @@ func PriceFromSubunits(currIsoCode string, grossValue int64, taxPercent float64,
 // parsing.
 // currIsoCode is an ISO 4217 currency code.
 // value is monetary value in subunits.
-// taxPercent is the amount of tax applied to this price.
 // roundFunc is a function to be used for division operations.
-func PriceFromString(currIsoCode string, grossValueStr string, taxPercent float64, f roundFunc) (Price, error) {
+func PriceFromString(currIsoCode string, grossValueStr string, f roundFunc) (Price, error) {
 	var price Price
 	var err error
 
@@ -62,31 +50,54 @@ func PriceFromString(currIsoCode string, grossValueStr string, taxPercent float6
 		return Price{}, err
 	}
 
-	price.taxPercent = taxPercent
-
-	if taxPercent < 0.0 || taxPercent > 100.0 {
-		return Price{}, fmt.Errorf("tax percent '%f' must be between 1 and 100", taxPercent)
-	}
-
-	if taxPercent < 100.0 {
-		price.net = price.gross.Div(1 + (taxPercent / 100))
-		price.tax = price.gross.Sub(price.net)
-	} else {
-		price.tax = price.gross
-		price.net = price.gross.Sub(price.tax)
+	price.taxes = taxes{
+		Total:  price.gross.Clone(0),
+		Detail: make([]tax, 0),
 	}
 
 	return price, nil
 }
 
 // PriceGBP is a helper function.
-func PriceGBP(value int64, taxPercent float64) (Price, error) {
-	return PriceFromSubunits("GBP", value, taxPercent, nil)
+func PriceGBP(grossValue int64, vat float64) (Price, error) {
+	price, err := PriceFromSubunits("GBP", grossValue, nil)
+	if err != nil {
+		return Price{}, err
+	}
+	price.IncludeTaxPercent(vat, "VAT")
+
+	return price, err
 }
 
-// PriceEUR is a helper function.
-func PriceEUR(value int64, taxPercent float64) (Price, error) {
-	return PriceFromSubunits("EUR", value, taxPercent, nil)
+// AddTaxSubunits adds a tax to the price using subunits.
+// This will literally add a subunit amount to the gross price.
+func (p *Price) AddTaxSubunits(value int64, desc string) {
+	t := p.gross.Clone(value)
+	p.taxes.Add(t, desc)
+	p.gross = p.gross.Add(t)
+}
+
+// AddTaxPercentage adds a tax to the price using a percentage.
+// This will literally add a percentage to the gross price.
+func (p *Price) AddTaxPercent(percent float64, desc string) {
+	v := float64(p.gross.value/100) * percent
+	t := p.gross.Clone(p.gross.round(v))
+	p.taxes.Add(t, desc)
+	p.gross = p.gross.Add(t)
+}
+
+// IncludeTaxSubunits adds a tax to the price using subunits.
+// This implies this tax is already included in the gross price.
+func (p *Price) IncludeTaxSubunits(value int64, desc string) {
+	t := p.gross.Clone(value)
+	p.taxes.Add(t, desc)
+}
+
+// AddTaxPercentage adds a tax to the price using a percentage.
+// This implies this tax is already included in the gross price.
+func (p *Price) IncludeTaxPercent(percent float64, desc string) {
+	t := p.Net().Sub(p.Net().Div(1 + (percent / 100)))
+	p.taxes.Add(t, desc)
 }
 
 // IsoCode returns the ISO 4217 currency code.
@@ -102,23 +113,29 @@ func (p Price) Gross() Money {
 // Net returns the net monetary value of the price which is equal to the gross
 // minus tax.
 func (p Price) Net() Money {
-	return p.net
+	return p.gross.Sub(p.taxes.Total)
 }
 
-// Tax returns the amount of tax subtracted from the gross to produce the net.
+// Tax returns the total amount of tax subtracted from the gross to produce the net.
 func (p Price) Tax() Money {
-	return p.tax
-}
-
-// TaxPercent returns the amount of tax subtracted from the gross to produce the
-// net, as a percentage.
-func (p Price) TaxPercent() float64 {
-	return p.taxPercent
+	return p.taxes.Total
 }
 
 // MarshalJSON is an implementation of json.Marshaller.
 func (p Price) MarshalJSON() ([]byte, error) {
-	json := fmt.Sprintf(`{"currency": "%s", "gross": "%s", "net": "%s", "tax": "%s", "taxPercent": %f}`, p.gross.format.code, p.gross, p.net, p.tax, p.taxPercent)
+	tax, err := json.Marshal(p.taxes)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	json := fmt.Sprintf(
+		`{"currency": "%s", "gross": "%s", "net": "%s", "tax": %s}`,
+		p.IsoCode(),
+		p.Gross(),
+		p.Net(),
+		tax,
+	)
+
 	return []byte(json), nil
 }
 

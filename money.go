@@ -97,6 +97,18 @@ func MoneyEUR(value int64) (Money, error) {
 	return MoneyFromSubunits("EUR", value, nil)
 }
 
+// MoneyUSD is a helper function.
+func MoneyUSD(value int64) (Money, error) {
+	return MoneyFromSubunits("USD", value, nil)
+}
+
+// Clone returns a copy of money with a different value.
+func (m Money) Clone(value int64) Money {
+	clone := m
+	clone.value = value
+	return clone
+}
+
 // IsoCode returns the ISO 4217 currency code.
 func (m Money) IsoCode() string {
 	return m.format.code
@@ -274,7 +286,7 @@ func (m Money) Allocate(ratios ...int64) []Money {
 
 // MarshalJSON is an implementation of json.Marshaller.
 func (m Money) MarshalJSON() ([]byte, error) {
-	json := fmt.Sprintf(`{"currency": "%s", "formatted":"%s"}`, m.format.code, m.String())
+	json := fmt.Sprintf(`{"currency": "%s", "formatted":"%s"}`, m.IsoCode(), m.String())
 	return []byte(json), nil
 }
 

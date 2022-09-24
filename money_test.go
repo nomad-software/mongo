@@ -18,6 +18,12 @@ func TestMoneyEUR(t *testing.T) {
 	assertMoneyValue(t, m, 22)
 }
 
+func TestMoneyUSD(t *testing.T) {
+	m, _ := MoneyUSD(22)
+	assertMoneyString(t, m, "USD", "$0.22")
+	assertMoneyValue(t, m, 22)
+}
+
 func TestMoneyScenario(t *testing.T) {
 	gross, _ := MoneyGBP(1059)
 	net := gross.Div(1.2)

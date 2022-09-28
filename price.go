@@ -12,11 +12,10 @@ type Price struct {
 	taxes taxes // The amount of tax subtracted from the gross to produce the net.
 }
 
-// PriceFromSubunits constructs a new price object from an integer and tax
-// percentage. The value integer used should represent the subunits of the
-// currency.
+// PriceFromSubunits constructs a new price object from an integer. The value
+// integer used should represent the subunits of the currency.
 // currIsoCode is an ISO 4217 currency code.
-// value is monetary value in subunits.
+// grossValue is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
 func PriceFromSubunits(currIsoCode string, grossValue int64, f roundFunc) (Price, error) {
 	var price Price
@@ -35,11 +34,10 @@ func PriceFromSubunits(currIsoCode string, grossValue int64, f roundFunc) (Price
 	return price, nil
 }
 
-// MoneyFromString constructs a new price object from a string and tax
-// percentage. Everything not contained within a number is stripped out before
-// parsing.
+// MoneyFromString constructs a new price object from a string. Everything not
+// contained within a number is stripped out before parsing.
 // currIsoCode is an ISO 4217 currency code.
-// value is monetary value in subunits.
+// grossValueStr is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
 func PriceFromString(currIsoCode string, grossValueStr string, f roundFunc) (Price, error) {
 	var price Price
@@ -59,6 +57,8 @@ func PriceFromString(currIsoCode string, grossValueStr string, f roundFunc) (Pri
 }
 
 // PriceGBP is a helper function.
+// grossValue is the gross monetary value in subunits.
+// vat is a tax percentage that's included in the gross value.
 func PriceGBP(grossValue int64, vat float64) (Price, error) {
 	price, err := PriceFromSubunits("GBP", grossValue, nil)
 	if err != nil {

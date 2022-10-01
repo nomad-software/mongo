@@ -93,7 +93,7 @@ func (p *Price) IncludeTaxSubunits(value int64, desc string) {
 	p.taxes.Add(t, desc)
 }
 
-// AddTaxPercentage adds a tax to the price using a percentage.
+// IncludeTaxPercent adds a tax to the price using a percentage.
 // This implies this tax is already included in the gross price.
 func (p *Price) IncludeTaxPercent(percent float64, desc string) {
 	t := p.Net().Sub(p.Net().Div(1 + (percent / 100)))

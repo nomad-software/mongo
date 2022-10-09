@@ -12,15 +12,14 @@ func TestAddTax(t *testing.T) {
 
 	taxes := taxes{
 		total:  t1,
-		detail: make([]tax, 0),
+		detail: make(map[string]Money, 0),
 	}
 
-	taxes.Add(t2, "VAT")
-	taxes.Add(t3, "VAT")
+	taxes = taxes.add("VAT", t2)
+	taxes = taxes.add("VAT", t3)
 
 	assertMoneyValue(t, taxes.total, 1844)
-	assertMoneyValue(t, taxes.detail[0].amount, 1387)
-	assertMoneyValue(t, taxes.detail[1].amount, 457)
+	assertMoneyValue(t, taxes.detail["VAT"], 1844)
 }
 
 func TestTaxJsonMarshalling(t *testing.T) {
@@ -29,11 +28,11 @@ func TestTaxJsonMarshalling(t *testing.T) {
 
 	taxes := taxes{
 		total:  t1,
-		detail: make([]tax, 0),
+		detail: make(map[string]Money, 0),
 	}
 
-	taxes.Add(t2, "VAT")
+	taxes = taxes.add("VAT", t2)
 
 	bytes, _ := json.Marshal(taxes)
-	assertJSON(t, bytes, `{"formatted":"£13.87","detail":[{"formatted":"£13.87","description":"VAT"}]}`)
+	assertJSON(t, bytes, `{"formatted":"£13.87","detail":[{"description":"VAT","formatted":"£13.87"}]}`)
 }

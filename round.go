@@ -5,12 +5,12 @@ import "math"
 // roundFunc is the type all the following rounding functions satisfy.
 type roundFunc func(float64) int64
 
-// RoundUp is a standard rounding function that always round up.
+// RoundUp is a standard rounding function that always rounds up.
 func RoundUp(f float64) int64 {
 	return int64(math.Ceil(f))
 }
 
-// RoundDown is a standard rounding function that always round down.
+// RoundDown is a standard rounding function that always rounds down.
 func RoundDown(f float64) int64 {
 	return int64(math.Floor(f))
 }

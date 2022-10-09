@@ -13,12 +13,12 @@ func TestPriceGBP(t *testing.T) {
 }
 
 func TestPriceFromSubunitsError(t *testing.T) {
-	p, err := PriceFromSubunits("XXX", 1457, nil)
+	_, err := PriceFromSubunits("XXX", 1457, nil)
 	if err == nil {
 		t.Errorf("PriceFromSubunits failed to error on code 'XXX'")
 	}
 
-	p, err = PriceFromSubunits("GBP", 1457, nil)
+	p, err := PriceFromSubunits("GBP", 1457, nil)
 	if err != nil {
 		t.Errorf("PriceFromSubunits failed to recognise code 'GBP'")
 	}
@@ -53,7 +53,8 @@ func TestPriceFromSubunitsNoTax(t *testing.T) {
 
 func TestPriceFromSubunitsMaxTax(t *testing.T) {
 	p, _ := PriceFromSubunits("GBP", 1059, nil)
-	p.IncludeTaxSubunits(1059, "VAT")
+	m, _ := MoneyFromSubunits("GBP", 1059, nil)
+	p.IncludeTax(m, "VAT")
 
 	assertMoneyString(t, p.Gross(), "GBP", "£10.59")
 	assertMoneyString(t, p.Net(), "GBP", "£0.00")
@@ -61,12 +62,12 @@ func TestPriceFromSubunitsMaxTax(t *testing.T) {
 }
 
 func TestPriceFromStringError(t *testing.T) {
-	p, err := PriceFromString("XXX", "£14.57", nil)
+	_, err := PriceFromString("XXX", "£14.57", nil)
 	if err == nil {
 		t.Errorf("PriceFromString failed to error on code 'XXX'")
 	}
 
-	p, err = PriceFromString("GBP", "£14.57", nil)
+	p, err := PriceFromString("GBP", "£14.57", nil)
 	if err != nil {
 		t.Errorf("PriceFromString failed to recognise code 'GBP'")
 	}
@@ -101,7 +102,8 @@ func TestPriceFromStringNoTax(t *testing.T) {
 
 func TestPriceFromStringMaxTax(t *testing.T) {
 	p, _ := PriceFromString("GBP", "£10.59", nil)
-	p.IncludeTaxSubunits(1059, "VAT")
+	m, _ := MoneyFromSubunits("GBP", 1059, nil)
+	p.IncludeTax(m, "VAT")
 
 	assertMoneyString(t, p.Gross(), "GBP", "£10.59")
 	assertMoneyString(t, p.Net(), "GBP", "£0.00")
@@ -120,10 +122,10 @@ func TestPriceJsonMarshalling(t *testing.T) {
 	}
 
 	bytes, _ := json.Marshal(price)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"formatted":"£1.83","detail":[{"formatted":"£1.83","description":"VAT"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"formatted":"£1.83","detail":[{"description":"VAT","formatted":"£1.83"}]}}`)
 
 	bytes, _ = json.Marshal(resp)
-	assertJSON(t, bytes, `{"name":"Widget","price":{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"formatted":"£1.83","detail":[{"formatted":"£1.83","description":"VAT"}]}}}`)
+	assertJSON(t, bytes, `{"name":"Widget","price":{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"formatted":"£1.83","detail":[{"description":"VAT","formatted":"£1.83"}]}}}`)
 }
 
 func TestPriceString(t *testing.T) {
@@ -132,9 +134,10 @@ func TestPriceString(t *testing.T) {
 	assertPriceStringNoSymbol(t, price, "GBP", "10.99")
 }
 
-func TestAddTaxSubunits(t *testing.T) {
+func TestAddTaxMoney(t *testing.T) {
 	p, _ := PriceFromSubunits("GBP", 5500, nil)
-	p.AddTaxSubunits(825, "VAT")
+	m, _ := MoneyFromSubunits("GBP", 825, nil)
+	p.AddTax(m, "VAT")
 
 	assertMoneyValue(t, p.Gross(), 6325)
 	assertMoneyValue(t, p.Net(), 5500)
@@ -150,9 +153,10 @@ func TestAddTaxPercent(t *testing.T) {
 	assertMoneyValue(t, p.Tax(), 825)
 }
 
-func TestIncludeTaxSubunits(t *testing.T) {
+func TestIncludeTaxMoney(t *testing.T) {
 	p, _ := PriceFromSubunits("GBP", 5500, nil)
-	p.IncludeTaxSubunits(825, "VAT")
+	m, _ := MoneyFromSubunits("GBP", 825, nil)
+	p.IncludeTax(m, "VAT")
 
 	assertMoneyValue(t, p.Gross(), 5500)
 	assertMoneyValue(t, p.Net(), 4675)
@@ -176,4 +180,63 @@ func TestIncludeTaxPercent(t *testing.T) {
 	assertMoneyValue(t, p.Gross(), 2083)
 	assertMoneyValue(t, p.Net(), 1458)
 	assertMoneyValue(t, p.Tax(), 625)
+}
+
+func TestAddPriceAndImmutability(t *testing.T) {
+	p1, _ := PriceFromSubunits("GBP", 2083, nil)
+	p1.AddTaxPercent(15, "VAT")
+	p1.AddTaxPercent(5, "Small order")
+
+	assertMoneyValue(t, p1.Gross(), 2515)
+	assertMoneyValue(t, p1.Net(), 2083)
+	assertMoneyValue(t, p1.Tax(), 432)
+
+	bytes, _ := json.Marshal(p1)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"formatted":"£4.32","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£3.12"}]}}`)
+
+	p2, _ := PriceFromSubunits("GBP", 1545, nil)
+	p2.AddTaxPercent(15, "VAT")
+
+	p3 := p1.Add(p2)
+	assertMoneyValue(t, p3.Gross(), 4292)
+	assertMoneyValue(t, p3.Net(), 3628)
+	assertMoneyValue(t, p3.Tax(), 664)
+
+	bytes, _ = json.Marshal(p3)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£42.92","net":"£36.28","tax":{"formatted":"£6.64","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£5.44"}]}}`)
+
+	assertMoneyValue(t, p1.Gross(), 2515)
+	assertMoneyValue(t, p1.Net(), 2083)
+	assertMoneyValue(t, p1.Tax(), 432)
+
+	bytes, _ = json.Marshal(p1)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"formatted":"£4.32","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£3.12"}]}}`)
+}
+
+func TestMulPriceAndImmutability(t *testing.T) {
+	p1, _ := PriceFromSubunits("GBP", 2083, nil)
+	p1.AddTaxPercent(15, "VAT")
+	p1.AddTaxPercent(5, "Small order")
+
+	assertMoneyValue(t, p1.Gross(), 2515)
+	assertMoneyValue(t, p1.Net(), 2083)
+	assertMoneyValue(t, p1.Tax(), 432)
+
+	bytes, _ := json.Marshal(p1)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"formatted":"£4.32","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£3.12"}]}}`)
+
+	p2 := p1.Mul(3)
+	assertMoneyValue(t, p2.Gross(), 7545)
+	assertMoneyValue(t, p2.Net(), 6249)
+	assertMoneyValue(t, p2.Tax(), 1296)
+
+	bytes, _ = json.Marshal(p2)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£75.45","net":"£62.49","tax":{"formatted":"£12.96","detail":[{"description":"Small order","formatted":"£3.60"},{"description":"VAT","formatted":"£9.36"}]}}`)
+
+	assertMoneyValue(t, p1.Gross(), 2515)
+	assertMoneyValue(t, p1.Net(), 2083)
+	assertMoneyValue(t, p1.Tax(), 432)
+
+	bytes, _ = json.Marshal(p1)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"formatted":"£4.32","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£3.12"}]}}`)
 }

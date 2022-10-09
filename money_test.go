@@ -38,12 +38,12 @@ func TestMoneyScenario(t *testing.T) {
 }
 
 func TestMoneyFromSubunitsError(t *testing.T) {
-	m, err := MoneyFromSubunits("XXX", 1457, RoundHalfUp)
+	_, err := MoneyFromSubunits("XXX", 1457, RoundHalfUp)
 	if err == nil {
 		t.Errorf("MoneyFromSubunits failed to error on code 'XXX'")
 	}
 
-	m, err = MoneyFromSubunits("GBP", 1457, RoundHalfToEven)
+	m, err := MoneyFromSubunits("GBP", 1457, RoundHalfToEven)
 	if err != nil {
 		t.Errorf("MoneyFromSubunits failed to recognise code 'GBP'")
 	}
@@ -52,12 +52,12 @@ func TestMoneyFromSubunitsError(t *testing.T) {
 }
 
 func TestMoneyFromStringError(t *testing.T) {
-	m, err := MoneyFromString("XXX", "14.57", RoundHalfUp)
+	_, err := MoneyFromString("XXX", "14.57", RoundHalfUp)
 	if err == nil {
 		t.Errorf("MoneyFromSubunits failed to error on code 'XXX'")
 	}
 
-	m, err = MoneyFromString("GBP", "14.57", RoundHalfUp)
+	m, err := MoneyFromString("GBP", "14.57", RoundHalfUp)
 	if err != nil {
 		t.Errorf("MoneyFromSubunits failed to recognise code 'GBP'")
 	}

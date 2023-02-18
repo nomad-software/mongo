@@ -122,10 +122,10 @@ func TestPriceJsonMarshalling(t *testing.T) {
 	}
 
 	bytes, _ := json.Marshal(price)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"formatted":"£1.83","detail":[{"description":"VAT","formatted":"£1.83"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"total":"£1.83","detail":[{"amount":"£1.83","description":"VAT"}]}}`)
 
 	bytes, _ = json.Marshal(resp)
-	assertJSON(t, bytes, `{"name":"Widget","price":{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"formatted":"£1.83","detail":[{"description":"VAT","formatted":"£1.83"}]}}}`)
+	assertJSON(t, bytes, `{"name":"Widget","price":{"currency":"GBP","gross":"£10.99","net":"£9.16","tax":{"total":"£1.83","detail":[{"amount":"£1.83","description":"VAT"}]}}}`)
 }
 
 func TestPriceString(t *testing.T) {
@@ -192,7 +192,7 @@ func TestAddPriceAndImmutability(t *testing.T) {
 	assertMoneyValue(t, p1.Tax(), 432)
 
 	bytes, _ := json.Marshal(p1)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"formatted":"£4.32","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£3.12"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"total":"£4.32","detail":[{"amount":"£1.20","description":"Small order"},{"amount":"£3.12","description":"VAT"}]}}`)
 
 	p2, _ := PriceFromSubunits("GBP", 1545, nil)
 	p2.AddTaxPercent(15, "VAT")
@@ -203,14 +203,14 @@ func TestAddPriceAndImmutability(t *testing.T) {
 	assertMoneyValue(t, p3.Tax(), 664)
 
 	bytes, _ = json.Marshal(p3)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£42.92","net":"£36.28","tax":{"formatted":"£6.64","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£5.44"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£42.92","net":"£36.28","tax":{"total":"£6.64","detail":[{"amount":"£1.20","description":"Small order"},{"amount":"£5.44","description":"VAT"}]}}`)
 
 	assertMoneyValue(t, p1.Gross(), 2515)
 	assertMoneyValue(t, p1.Net(), 2083)
 	assertMoneyValue(t, p1.Tax(), 432)
 
 	bytes, _ = json.Marshal(p1)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"formatted":"£4.32","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£3.12"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"total":"£4.32","detail":[{"amount":"£1.20","description":"Small order"},{"amount":"£3.12","description":"VAT"}]}}`)
 }
 
 func TestMulPriceAndImmutability(t *testing.T) {
@@ -223,7 +223,7 @@ func TestMulPriceAndImmutability(t *testing.T) {
 	assertMoneyValue(t, p1.Tax(), 432)
 
 	bytes, _ := json.Marshal(p1)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"formatted":"£4.32","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£3.12"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"total":"£4.32","detail":[{"amount":"£1.20","description":"Small order"},{"amount":"£3.12","description":"VAT"}]}}`)
 
 	p2 := p1.Mul(3)
 	assertMoneyValue(t, p2.Gross(), 7545)
@@ -231,12 +231,12 @@ func TestMulPriceAndImmutability(t *testing.T) {
 	assertMoneyValue(t, p2.Tax(), 1296)
 
 	bytes, _ = json.Marshal(p2)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£75.45","net":"£62.49","tax":{"formatted":"£12.96","detail":[{"description":"Small order","formatted":"£3.60"},{"description":"VAT","formatted":"£9.36"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£75.45","net":"£62.49","tax":{"total":"£12.96","detail":[{"amount":"£3.60","description":"Small order"},{"amount":"£9.36","description":"VAT"}]}}`)
 
 	assertMoneyValue(t, p1.Gross(), 2515)
 	assertMoneyValue(t, p1.Net(), 2083)
 	assertMoneyValue(t, p1.Tax(), 432)
 
 	bytes, _ = json.Marshal(p1)
-	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"formatted":"£4.32","detail":[{"description":"Small order","formatted":"£1.20"},{"description":"VAT","formatted":"£3.12"}]}}`)
+	assertJSON(t, bytes, `{"currency":"GBP","gross":"£25.15","net":"£20.83","tax":{"total":"£4.32","detail":[{"amount":"£1.20","description":"Small order"},{"amount":"£3.12","description":"VAT"}]}}`)
 }

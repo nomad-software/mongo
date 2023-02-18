@@ -47,7 +47,7 @@ func (d detail) MarshalJSON() ([]byte, error) {
 	json := make([]string, 0)
 
 	for k, v := range d {
-		json = append(json, fmt.Sprintf(`{"description": "%s", "formatted": "%s"}`, k, v.String()))
+		json = append(json, fmt.Sprintf(`{"amount": "%s", "description": "%s"}`, v.String(), k))
 	}
 
 	// Because the json map's order is non-deterministic, sort for deterministic output.
@@ -84,7 +84,7 @@ func (t taxes) MarshalJSON() ([]byte, error) {
 	}
 
 	json := fmt.Sprintf(
-		`{"formatted": "%s", "detail": %s}`,
+		`{"total": "%s", "detail": %s}`,
 		t.total.String(),
 		detail,
 	)

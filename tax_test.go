@@ -17,5 +17,5 @@ func TestTaxJsonMarshalling(t *testing.T) {
 	taxes = taxes.add("VAT", t2)
 
 	bytes, _ := json.Marshal(taxes)
-	assertJSON(t, bytes, `{"formatted":"£13.87","detail":[{"description":"VAT","formatted":"£13.87"}]}`)
+	assertJSON(t, bytes, `{"total":"£13.87","detail":[{"amount":"£13.87","description":"VAT"}]}`)
 }

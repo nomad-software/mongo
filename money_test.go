@@ -521,8 +521,8 @@ func TestMoneyJsonMarshalling(t *testing.T) {
 	}
 
 	bytes, _ := json.Marshal(cost)
-	assertJSON(t, bytes, `{"currency":"GBP","formatted":"£10.99"}`)
+	assertJSON(t, bytes, `{"currency":"GBP","amount":"£10.99"}`)
 
 	bytes, _ = json.Marshal(resp)
-	assertJSON(t, bytes, `{"name":"Widget","cost":{"currency":"GBP","formatted":"£10.99"}}`)
+	assertJSON(t, bytes, `{"name":"Widget","cost":{"currency":"GBP","amount":"£10.99"}}`)
 }

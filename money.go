@@ -286,7 +286,7 @@ func (m Money) Allocate(ratios ...int64) []Money {
 
 // MarshalJSON is an implementation of json.Marshaller.
 func (m Money) MarshalJSON() ([]byte, error) {
-	json := fmt.Sprintf(`{"currency": "%s", "formatted":"%s"}`, m.IsoCode(), m.String())
+	json := fmt.Sprintf(`{"currency": "%s", "amount":"%s"}`, m.IsoCode(), m.String())
 	return []byte(json), nil
 }
 

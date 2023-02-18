@@ -53,7 +53,7 @@ func main() {
 Money: £10.55
 Shares: [£3.52 £3.52 £3.51]
 Allocations: [£1.76 £3.52 £5.27]
-{"currency":"GBP","formatted":"£10.55"}
+{"currency":"GBP","amount":"£10.55"}
 ```
 
 ## Example 2
@@ -88,5 +88,5 @@ func main() {
 
 ```
 Price: £10.55
-{"currency":"GBP","gross":"£10.55","net":"£8.98","tax":{"formatted":"£1.57","detail":[{"formatted":"£1.57","description":"VAT"}]}}
+{"currency":"GBP","gross":"£10.55","net":"£8.98","tax":{"total":"£1.57","detail":[{"amount":"£1.57","description":"VAT"}]}}
 ```

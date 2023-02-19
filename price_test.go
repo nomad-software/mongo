@@ -5,6 +5,48 @@ import (
 	"testing"
 )
 
+func TestGenericIntegerPriceTypes(t *testing.T) {
+	p, _ := PriceGBP(int8(104), 20)
+	assertMoneyValue(t, p.Gross(), 104)
+	assertMoneyValue(t, p.Net(), 87)
+	assertMoneyValue(t, p.Tax(), 17)
+
+	p, _ = PriceGBP(uint8(104), 20)
+	assertMoneyValue(t, p.Gross(), 104)
+	assertMoneyValue(t, p.Net(), 87)
+	assertMoneyValue(t, p.Tax(), 17)
+
+	p, _ = PriceGBP(int16(1528), 20)
+	assertMoneyValue(t, p.Gross(), 1528)
+	assertMoneyValue(t, p.Net(), 1273)
+	assertMoneyValue(t, p.Tax(), 255)
+
+	p, _ = PriceGBP(uint16(1528), 20)
+	assertMoneyValue(t, p.Gross(), 1528)
+	assertMoneyValue(t, p.Net(), 1273)
+	assertMoneyValue(t, p.Tax(), 255)
+
+	p, _ = PriceGBP(int32(68242), 20)
+	assertMoneyValue(t, p.Gross(), 68242)
+	assertMoneyValue(t, p.Net(), 56868)
+	assertMoneyValue(t, p.Tax(), 11374)
+
+	p, _ = PriceGBP(uint32(68242), 20)
+	assertMoneyValue(t, p.Gross(), 68242)
+	assertMoneyValue(t, p.Net(), 56868)
+	assertMoneyValue(t, p.Tax(), 11374)
+
+	p, _ = PriceGBP(int64(4656414), 20)
+	assertMoneyValue(t, p.Gross(), 4656414)
+	assertMoneyValue(t, p.Net(), 3880345)
+	assertMoneyValue(t, p.Tax(), 776069)
+
+	p, _ = PriceGBP(uint64(4656414), 20)
+	assertMoneyValue(t, p.Gross(), 4656414)
+	assertMoneyValue(t, p.Net(), 3880345)
+	assertMoneyValue(t, p.Tax(), 776069)
+}
+
 func TestPriceGBP(t *testing.T) {
 	p, _ := PriceGBP(6425, 20)
 	assertMoneyValue(t, p.Gross(), 6425)

@@ -6,6 +6,32 @@ import (
 	"testing"
 )
 
+func TestGenericIntegerMoneyTypes(t *testing.T) {
+	m, _ := MoneyGBP(int8(1))
+	assertMoneyString(t, m, "GBP", "£0.01")
+
+	m, _ = MoneyGBP(uint8(2))
+	assertMoneyString(t, m, "GBP", "£0.02")
+
+	m, _ = MoneyGBP(int16(3))
+	assertMoneyString(t, m, "GBP", "£0.03")
+
+	m, _ = MoneyGBP(uint16(4))
+	assertMoneyString(t, m, "GBP", "£0.04")
+
+	m, _ = MoneyGBP(int32(5))
+	assertMoneyString(t, m, "GBP", "£0.05")
+
+	m, _ = MoneyGBP(uint32(6))
+	assertMoneyString(t, m, "GBP", "£0.06")
+
+	m, _ = MoneyGBP(int64(7))
+	assertMoneyString(t, m, "GBP", "£0.07")
+
+	m, _ = MoneyGBP(uint64(8))
+	assertMoneyString(t, m, "GBP", "£0.08")
+}
+
 func TestMoneyGBP(t *testing.T) {
 	m, _ := MoneyGBP(11)
 	assertMoneyString(t, m, "GBP", "£0.11")

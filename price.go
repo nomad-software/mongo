@@ -3,6 +3,8 @@ package mongo
 import (
 	"encoding/json"
 	"fmt"
+
+	"golang.org/x/exp/constraints"
 )
 
 // Price is a structure that holds a price and gives information about the
@@ -17,7 +19,7 @@ type Price struct {
 // currIsoCode is an ISO 4217 currency code.
 // grossValue is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
-func PriceFromSubunits(currIsoCode string, grossValue int64, f roundFunc) (Price, error) {
+func PriceFromSubunits[T constraints.Integer](currIsoCode string, grossValue T, f roundFunc) (Price, error) {
 	var price Price
 	var err error
 
@@ -59,7 +61,7 @@ func PriceFromString(currIsoCode string, grossValueStr string, f roundFunc) (Pri
 // PriceGBP is a helper function.
 // grossValue is the gross monetary value in subunits.
 // vat is a tax percentage that's included in the gross value.
-func PriceGBP(grossValue int64, vat float64) (Price, error) {
+func PriceGBP[T constraints.Integer](grossValue T, vat float64) (Price, error) {
 	price, err := PriceFromSubunits("GBP", grossValue, nil)
 	if err != nil {
 		return Price{}, err

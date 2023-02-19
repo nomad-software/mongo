@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"golang.org/x/exp/constraints"
 )
 
 // Money is the main structure that holds a monetary value and how to format it
@@ -21,7 +23,7 @@ type Money struct {
 // currIsoCode is an ISO 4217 currency code.
 // value is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
-func MoneyFromSubunits(currIsoCode string, value int64, f roundFunc) (Money, error) {
+func MoneyFromSubunits[T constraints.Integer](currIsoCode string, value T, f roundFunc) (Money, error) {
 	curr, ok := currencyFormats[currIsoCode]
 	if !ok {
 		return Money{}, fmt.Errorf("the currency code '%s' is not recognised", currIsoCode)
@@ -31,7 +33,7 @@ func MoneyFromSubunits(currIsoCode string, value int64, f roundFunc) (Money, err
 	}
 	m := Money{
 		format: curr,
-		value:  value,
+		value:  int64(value),
 		round:  f,
 	}
 	return m, nil
@@ -88,17 +90,17 @@ func MoneyFromString(currIsoCode string, str string, f roundFunc) (Money, error)
 }
 
 // MoneyGBP is a helper function.
-func MoneyGBP(value int64) (Money, error) {
+func MoneyGBP[T constraints.Integer](value T) (Money, error) {
 	return MoneyFromSubunits("GBP", value, nil)
 }
 
 // MoneyEUR is a helper function.
-func MoneyEUR(value int64) (Money, error) {
+func MoneyEUR[T constraints.Integer](value T) (Money, error) {
 	return MoneyFromSubunits("EUR", value, nil)
 }
 
 // MoneyUSD is a helper function.
-func MoneyUSD(value int64) (Money, error) {
+func MoneyUSD[T constraints.Integer](value T) (Money, error) {
 	return MoneyFromSubunits("USD", value, nil)
 }
 

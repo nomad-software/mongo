@@ -6,6 +6,14 @@ import (
 	"testing"
 )
 
+func TestGenericFloatMoneyTypes(t *testing.T) {
+	m, _ := MoneyFromFloat("GBP", float32(65456.95), nil)
+	assertMoneyString(t, m, "GBP", "£65,456.95")
+
+	m, _ = MoneyFromFloat("GBP", float64(65456.95), nil)
+	assertMoneyString(t, m, "GBP", "£65,456.95")
+}
+
 func TestGenericIntegerMoneyTypes(t *testing.T) {
 	m, _ := MoneyGBP(int8(1))
 	assertMoneyString(t, m, "GBP", "£0.01")
@@ -72,6 +80,20 @@ func TestMoneyFromSubunitsError(t *testing.T) {
 	m, err := MoneyFromSubunits("GBP", 1457, RoundHalfToEven)
 	if err != nil {
 		t.Errorf("MoneyFromSubunits failed to recognise code 'GBP'")
+	}
+
+	assertMoneyValue(t, m, 1457)
+}
+
+func TestMoneyFromFloatError(t *testing.T) {
+	_, err := MoneyFromFloat("XXX", 14.57, RoundHalfUp)
+	if err == nil {
+		t.Errorf("MoneyFromFloat failed to error on code 'XXX'")
+	}
+
+	m, err := MoneyFromFloat("GBP", 14.57, RoundHalfToEven)
+	if err != nil {
+		t.Errorf("MoneyFromFloat failed to recognise code 'GBP'")
 	}
 
 	assertMoneyValue(t, m, 1457)

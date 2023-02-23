@@ -17,13 +17,35 @@ type Price struct {
 // PriceFromSubunits constructs a new price object from an integer. The value
 // integer used should represent the subunits of the currency.
 // currIsoCode is an ISO 4217 currency code.
-// grossValue is monetary value in subunits.
+// gross is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
-func PriceFromSubunits[T constraints.Integer](currIsoCode string, grossValue T, f roundFunc) (Price, error) {
+func PriceFromSubunits[T constraints.Integer](currIsoCode string, gross T, f roundFunc) (Price, error) {
 	var price Price
 	var err error
 
-	price.gross, err = MoneyFromSubunits(currIsoCode, grossValue, f)
+	price.gross, err = MoneyFromSubunits(currIsoCode, gross, f)
+	if err != nil {
+		return Price{}, err
+	}
+
+	price.taxes = taxes{
+		total:  price.gross.Clone(0),
+		detail: make(map[string]Money, 0),
+	}
+
+	return price, nil
+}
+
+// PriceFromSubunits constructs a new price object from an integer. The value
+// integer used should represent the subunits of the currency.
+// currIsoCode is an ISO 4217 currency code.
+// gross is monetary value expressed as a float.
+// roundFunc is a function to be used for division operations.
+func PriceFromFloat[T constraints.Float](currIsoCode string, gross T, f roundFunc) (Price, error) {
+	var price Price
+	var err error
+
+	price.gross, err = MoneyFromFloat(currIsoCode, gross, f)
 	if err != nil {
 		return Price{}, err
 	}
@@ -39,13 +61,13 @@ func PriceFromSubunits[T constraints.Integer](currIsoCode string, grossValue T, 
 // MoneyFromString constructs a new price object from a string. Everything not
 // contained within a number is stripped out before parsing.
 // currIsoCode is an ISO 4217 currency code.
-// grossValueStr is monetary value in subunits.
+// gross is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
-func PriceFromString(currIsoCode string, grossValueStr string, f roundFunc) (Price, error) {
+func PriceFromString(currIsoCode string, gross string, f roundFunc) (Price, error) {
 	var price Price
 	var err error
 
-	price.gross, err = MoneyFromString(currIsoCode, grossValueStr, f)
+	price.gross, err = MoneyFromString(currIsoCode, gross, f)
 	if err != nil {
 		return Price{}, err
 	}
@@ -59,10 +81,10 @@ func PriceFromString(currIsoCode string, grossValueStr string, f roundFunc) (Pri
 }
 
 // PriceGBP is a helper function.
-// grossValue is the gross monetary value in subunits.
+// gross is the gross monetary value in subunits.
 // vat is a tax percentage that's included in the gross value.
-func PriceGBP[T constraints.Integer](grossValue T, vat float64) (Price, error) {
-	price, err := PriceFromSubunits("GBP", grossValue, nil)
+func PriceGBP[T constraints.Integer](gross T, vat float64) (Price, error) {
+	price, err := PriceFromSubunits("GBP", gross, nil)
 	if err != nil {
 		return Price{}, err
 	}

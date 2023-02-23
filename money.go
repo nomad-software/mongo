@@ -39,10 +39,25 @@ func MoneyFromSubunits[T constraints.Integer](currIsoCode string, value T, f rou
 	return m, nil
 }
 
+// MoneyFromFloat constructs a new money object from a floating point number.
+// currIsoCode is an ISO 4217 currency code.
+// value is monetary value expressed as a float.
+// roundFunc is a function to be used for division operations.
+func MoneyFromFloat[T constraints.Float](currIsoCode string, value T, f roundFunc) (Money, error) {
+	curr, ok := currencyFormats[currIsoCode]
+	if !ok {
+		return Money{}, fmt.Errorf("the currency code '%s' is not recognised", currIsoCode)
+	}
+
+	subunits := int64(math.Round(float64(value) * (math.Pow(10, float64(curr.subunits)))))
+
+	return MoneyFromSubunits(currIsoCode, subunits, f)
+}
+
 // MoneyFromString constructs a new money object from a string. Everything not
 // contained within a number is stripped out before parsing.
 // currIsoCode is an ISO 4217 currency code.
-// value is monetary value in subunits.
+// str is monetary value expressed as a string.
 // roundFunc is a function to be used for division operations.
 func MoneyFromString(currIsoCode string, str string, f roundFunc) (Money, error) {
 	curr, ok := currencyFormats[currIsoCode]

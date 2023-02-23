@@ -5,6 +5,32 @@ import (
 	"testing"
 )
 
+func TestGenericFloatPriceTypes(t *testing.T) {
+	p, _ := PriceFromFloat("GBP", float32(682.42), nil)
+	p.IncludeTaxPercent(20.0, "VAT")
+	assertMoneyValue(t, p.Gross(), 68242)
+	assertMoneyValue(t, p.Net(), 56868)
+	assertMoneyValue(t, p.Tax(), 11374)
+
+	p, _ = PriceFromFloat("GBP", float32(682.42), nil)
+	p.IncludeTaxPercent(20.0, "VAT")
+	assertMoneyValue(t, p.Gross(), 68242)
+	assertMoneyValue(t, p.Net(), 56868)
+	assertMoneyValue(t, p.Tax(), 11374)
+
+	p, _ = PriceFromFloat("GBP", float64(46564.14), nil)
+	p.IncludeTaxPercent(20.0, "VAT")
+	assertMoneyValue(t, p.Gross(), 4656414)
+	assertMoneyValue(t, p.Net(), 3880345)
+	assertMoneyValue(t, p.Tax(), 776069)
+
+	p, _ = PriceFromFloat("GBP", float64(46564.14), nil)
+	p.IncludeTaxPercent(20.0, "VAT")
+	assertMoneyValue(t, p.Gross(), 4656414)
+	assertMoneyValue(t, p.Net(), 3880345)
+	assertMoneyValue(t, p.Tax(), 776069)
+}
+
 func TestGenericIntegerPriceTypes(t *testing.T) {
 	p, _ := PriceGBP(int8(104), 20)
 	assertMoneyValue(t, p.Gross(), 104)
@@ -63,6 +89,25 @@ func TestPriceFromSubunitsError(t *testing.T) {
 	p, err := PriceFromSubunits("GBP", 1457, nil)
 	if err != nil {
 		t.Errorf("PriceFromSubunits failed to recognise code 'GBP'")
+	}
+
+	assertMoneyValue(t, p.Gross(), 1457)
+	assertMoneyValue(t, p.Net(), 1457)
+	assertMoneyValue(t, p.Tax(), 0)
+
+	assertSameMoneyCurrency(p.Gross(), p.Net())
+	assertSameMoneyCurrency(p.Net(), p.Tax())
+}
+
+func TestPriceFromFloatError(t *testing.T) {
+	_, err := PriceFromFloat("XXX", 14.57, nil)
+	if err == nil {
+		t.Errorf("PriceFromFloat failed to error on code 'XXX'")
+	}
+
+	p, err := PriceFromFloat("GBP", 14.57, nil)
+	if err != nil {
+		t.Errorf("PriceFromFloat failed to recognise code 'GBP'")
 	}
 
 	assertMoneyValue(t, p.Gross(), 1457)

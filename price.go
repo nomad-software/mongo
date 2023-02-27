@@ -14,8 +14,7 @@ type Price struct {
 	taxes taxes // The amount of tax subtracted from the gross to produce the net.
 }
 
-// PriceFromSubunits constructs a new price object from an integer. The value
-// integer used should represent the subunits of the currency.
+// PriceFromSubunits constructs a new price object from an integer.
 // currIsoCode is an ISO 4217 currency code.
 // gross is monetary value in subunits.
 // roundFunc is a function to be used for division operations.
@@ -36,8 +35,7 @@ func PriceFromSubunits[T constraints.Integer](currIsoCode string, gross T, f rou
 	return price, nil
 }
 
-// PriceFromSubunits constructs a new price object from an integer. The value
-// integer used should represent the subunits of the currency.
+// PriceFromFloat constructs a new price object from a floating point number.
 // currIsoCode is an ISO 4217 currency code.
 // gross is monetary value expressed as a float.
 // roundFunc is a function to be used for division operations.
@@ -58,10 +56,10 @@ func PriceFromFloat[T constraints.Float](currIsoCode string, gross T, f roundFun
 	return price, nil
 }
 
-// MoneyFromString constructs a new price object from a string. Everything not
+// PriceFromString constructs a new price object from a string. Everything not
 // contained within a number is stripped out before parsing.
 // currIsoCode is an ISO 4217 currency code.
-// gross is monetary value in subunits.
+// gross is monetary value expressed as a string.
 // roundFunc is a function to be used for division operations.
 func PriceFromString(currIsoCode string, gross string, f roundFunc) (Price, error) {
 	var price Price
